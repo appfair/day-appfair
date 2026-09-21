@@ -50,6 +50,14 @@ jobs:
         run: |
           "$DAY_BIN" lint
 
+      # dayapp.yml skips its Rust preflight for a generated project, so the sources this template
+      # ships are formatted here. rustfmt needs no dependencies, so it costs a second.
+      - name: Its sources are formatted
+        working-directory: fair-starter
+        run: |
+          rustup component add rustfmt
+          cargo fmt --all -- --check
+
       - name: It carries its licenses, and every source file says so
         working-directory: fair-starter
         run: |
