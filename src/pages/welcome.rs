@@ -2,9 +2,8 @@
 
 use day::prelude::*;
 
-/// The opening screen: the app's own mark, a greeting, and markdown prose from the
-/// translation (https://daybrite.dev/docs/resources). The App Fair text links out to
-/// appfair.org, which the link handler opens in the browser.
+/// The opening screen: the app mark, a greeting, and markdown prose from the translation
+/// (https://daybrite.dev/docs/resources). Its links open in the browser.
 pub(crate) fn welcome_page() -> impl Piece {
     column((
         spacer(),
@@ -19,7 +18,7 @@ pub(crate) fn welcome_page() -> impl Piece {
         label(crate::res::str::welcome_body())
             .markdown()
             .on_link(|target| {
-                // Desktop Settings lives in its own window instead of the navigation host.
+                // Desktop Settings opens a separate window rather than a nav section.
                 if target == "#settings" && crate::has_menu_bar() {
                     day::open_preferences();
                 } else {

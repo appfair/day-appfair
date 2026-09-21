@@ -1,12 +1,11 @@
 # SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
 #
-# The template checking itself. A template is only useful if `day new app --template` still
-# produces something that builds, and that is a thing to find out here rather than in someone's
-# first five minutes.
+# The template, checked the way a user meets it: scaffold an app from this checkout, then put
+# that app through the workflow every Day app uses. Eight primary targets, both languages,
+# both appearances, and the packaging each platform does.
 #
-# Two jobs: the template's own rules on one ubuntu runner, and then the app it generates put
-# through the workflow every Day app uses — all eight primary targets, both languages, both
-# appearances, and the packaging each platform does.
+# A push to the default branch also publishes the generated app's web build to this repository's
+# Pages, so https://appfair.github.io/day-appfair/ is what the template currently produces.
 name: template
 
 on:
@@ -17,10 +16,12 @@ on:
 
 permissions:
   contents: read
+  pages: write    # the generated app's web-dom build → this repository's Pages
+  id-token: write # the OIDC token deploy-pages exchanges
 
 jobs:
-  # What only a template can get wrong: the licences, the SPDX notices, and the dot-directory
-  # conventions. Seconds on one runner, and it fails before the matrix below spends an hour.
+  # What only a template can get wrong: the licenses, the SPDX notices, and the dot-directory
+  # conventions. Seconds on one runner, before the matrix below spends an hour.
   checks:
     name: checks
     runs-on: ubuntu-latest
@@ -32,7 +33,7 @@ jobs:
       - name: Install the day CLI
         uses: daybrite/actions/.github/actions/setup-day-cli@main
         with:
-          # The framework the template is written against; `latest` would test this checkout
+          # The framework the template is written against. `latest` would test this checkout
           # against a published CLI that may not carry the conventions it uses.
           version: main
 
@@ -49,7 +50,7 @@ jobs:
         run: |
           "$DAY_BIN" lint
 
-      - name: It carries its licences, and every source file says so
+      - name: It carries its licenses, and every source file says so
         working-directory: fair-starter
         run: |
           set -euo pipefail
@@ -73,15 +74,14 @@ jobs:
           test -f .github/workflows/ci.yml
           test ! -e .github/workflows/template.yml
           test ! -e .github/README.md
-          # Both languages travel with the app, in the catalogue and in the store listing.
+          # Both languages travel with the app, in the catalog and in the store listing.
           test -s resource/locales/en/app.ftl
           test -s resource/locales/fr/app.ftl
           test -s store/fr/description.txt
 
   # The generated app, through the workflow every Day app uses. `setup-command` scaffolds the
-  # project before anything else, which is also what tells the workflow the project is generated
-  # rather than checked in: the Rust preflight, the dependency update and the pristine check all
-  # step aside for it.
+  # project and marks it generated, which skips the Rust preflight, the dependency update, and
+  # the pristine check.
   app:
     name: app
     needs: checks
@@ -96,15 +96,17 @@ jobs:
         day new app fair-starter --template . --no-input
         --appid org.appfair.app.fairstarter --git
         --toolkit windows-xaml,macos-appkit,linux-gtk,linux-qt,ios-uikit,android-mdc,harmony-arkui,web-dom
-      # The walkthrough the template ships, run in both languages and both appearances: a string
-      # that only breaks in French, or a control that disappears in dark, fails the build.
+      # The walkthrough the template ships, run in both languages and both appearances.
       scripts: dayscript/demo.yaml
       locales: en fr
       themes: light dark
-      # A template repository publishes nothing: no release assets, no store uploads, no site.
+      # The template publishes no packages: an app scaffolded from it does that.
       release-assets: false
       publish-release: false
       upload-ios: "false"
       upload-macos: "false"
       upload-play: "false"
-      deploy-web: false
+      # The web-dom build, served from https://appfair.github.io/day-appfair/ so the template's
+      # output can be opened rather than described. It reuses the dist the build job already
+      # produced, and deploys on a push to the default branch once every target has passed.
+      deploy-web: true

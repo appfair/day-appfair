@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Required even for the localhost dayscript engine socket (§14.5). -->
+    <!-- Required even for the localhost dayscript socket. -->
     <uses-permission android:name="android.permission.INTERNET" />
-    <!-- enableOnBackInvokedCallback: predictive back (docs/navigation.md) — DayActivity
-         registers an OnBackInvokedCallback while (and only while) the nav stack can pop. -->
+    <!-- enableOnBackInvokedCallback: predictive back. DayActivity registers an
+         OnBackInvokedCallback while the nav stack can pop.
+         https://daybrite.dev/docs/navigation -->
     <application
         android:label="${dayTitle}"
         android:icon="@mipmap/ic_launcher"

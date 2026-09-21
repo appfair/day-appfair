@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
 //! {{title}}, an App Fair app built with [Day](https://daybrite.dev). `root()` runs once and
-//! opens the first window; `window_shell` builds one window's UI, and each section lives under
-//! `pages/`.
+//! opens the first window; each section lives under `pages/`.
 
 use day::prelude::*;
 
@@ -100,8 +99,8 @@ fn window_shell(primary: bool) -> impl Piece {
         )
         .destination(|_: &Section| settings_page())
         .id("nav");
-    // Only the first window joins the route namespace and restores its place; two routed navs
-    // would make deep links ambiguous.
+    // Only the first window joins the route namespace: two routed navs make a deep link
+    // ambiguous.
     if primary {
         nav.restore("app.section")
     } else {
@@ -114,7 +113,7 @@ fn menus() -> Vec<MenuEntry> {
     vec![sub_menu(
         res::str::menu_file().format(),
         vec![
-            // The platform's own New Window item and ⌘N.
+            // The platform's New Window item and ⌘N.
             menu_role(MenuRole::NewWindow),
             menu_separator(),
             menu_item(res::str::cmd_appfair().format())

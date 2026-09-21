@@ -4,7 +4,7 @@ use crate::res;
 use day::prelude::*;
 
 /// Reapply what the last run chose, before any piece is built. `DAY_THEME` and `DAY_LOCALE`
-/// win when they are set, so a scripted run and a screenshot pass stay deterministic.
+/// win when set, so a scripted run and a screenshot pass stay fixed.
 pub(crate) fn apply_startup() {
     if std::env::var("DAY_LOCALE").is_err()
         && let Some(tag) = day::prefs::get(crate::LOCALE_KEY).filter(|t| !t.is_empty())
@@ -70,7 +70,7 @@ fn appearance_row() -> AnyPiece {
     .any()
 }
 
-/// The system language, then every locale under `resource/locales/` by its own name.
+/// The system language, then every locale under `resource/locales/` by its self-name.
 fn language_row() -> AnyPiece {
     let stored = day::prefs::get(crate::LOCALE_KEY).unwrap_or_default();
     let start = res::locales::ALL

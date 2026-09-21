@@ -5,9 +5,8 @@
 #
 #     day launch -p {{first_target}} --script dayscript/demo.yaml
 #
-# The App Fair's own CI runs it on every toolkit and in every bundled locale, so keep the
-# assertions on ids and routes rather than on translated text — the one text assertion below
-# reads a string the catalog defines in each language.
+# CI runs it on every toolkit and in every bundled locale, so assert on ids and routes rather
+# than on translated text.
 flow:
   # --- Welcome ------------------------------------------------------------------------------
   # The nav host mounts on every platform; which chrome it wears depends on the window width.
@@ -37,13 +36,13 @@ flow:
   - wait_idle: {}
   - assert_route: { route: navigate }
   - screenshot: expanded
-  # Back to the device's own width: a forced class changes the layout, not the pixels.
+  # Back to the device's width. A forced class changes the layout, not the pixels.
   - size_class: { width: auto }
   - wait_idle: {}
 
   # --- Settings -----------------------------------------------------------------------------
-  # A menu-bar platform keeps Settings in its own window, reached through App ▸ Settings…
-  # rather than the navigation host, so the route is driven only where it is a nav row.
+  # A menu-bar platform opens Settings in a separate window through App ▸ Settings…, so the
+  # route is driven only where Settings is a nav row.
   - navigate: { route: settings, skip_on: [appkit, gtk, qt, xaml] }
   - wait_idle: {}
   # The appearance row is present only where the backend honors a runtime override;

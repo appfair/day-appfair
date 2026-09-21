@@ -3,9 +3,8 @@
 use crate::res;
 use day::prelude::*;
 
-/// The second section: a short introduction and the App Fair's own pages, each a link the
-/// platform opens in the browser. Replace it with whatever your app's second section should be —
-/// the starter keeps it deliberately small.
+/// The second section: an introduction and three links the platform opens in the browser.
+/// Replace it with what your app's second section should be.
 pub(crate) fn navigate_page() -> impl Piece {
     column((
         label(res::str::navigate_title())

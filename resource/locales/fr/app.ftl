@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
 # {{title}} : chaînes de l'interface (https://daybrite.dev/docs/localization). Chaque clé
-# correspond à celle du catalogue anglais ; day-build vérifie que les deux s'accordent.
+# correspond à celle du catalogue anglais. day-build vérifie que les deux s'accordent.
 
 app_title = {{title}}
 
@@ -12,7 +12,7 @@ welcome_title = Bienvenue dans {{title}}
 welcome_body =
     Voici **{{title}}**, une application de l'[App Fair](https://appfair.org) : un logiciel libre, compilé à partir d'un code source que vous pouvez lire, et distribué par le projet App Fair.
 
-    L'App Fair compile elle-même chaque application depuis un commit étiqueté, compare le résultat à la version publiée par la mainteneuse, puis la signe avec ses propres clés. Rien d'autre n'est ajouté en chemin.
+    L'App Fair compile chaque application depuis un commit étiqueté, compare le résultat à la version publiée par la mainteneuse, puis la signe avec ses clés.
 
     Pour en savoir plus, rendez-vous sur [appfair.org](https://appfair.org), ou ouvrez les [**Réglages**](#settings) pour changer l'apparence et la langue.
 

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
 # {{title}}: UI strings (https://daybrite.dev/docs/localization). Add a locale by dropping a
-# sibling folder and translating it; the generated res::locales catalog picks up every locale
-# directory by itself. This starter ships English and French.
+# sibling folder and translating it. This starter ships English and French.
 
 app_title = {{title}}
 
@@ -9,15 +8,14 @@ nav_welcome = Welcome
 nav_navigate = The App Fair
 nav_settings = Settings
 
-# The Welcome page. `welcome_body` is rendered as markdown, so the emphasis and the links live
-# in the translation and a translator is free to stress a different word. Each paragraph is one
-# line: Fluent keeps the line breaks you write. A paragraph may not START with `*`, `[`, `.`
-# or `}` — Fluent reserves those, and a value that opens with one is dropped from the catalog.
+# The Welcome page. `welcome_body` is markdown, so a translator can stress a different word.
+# One line per paragraph: Fluent keeps the line breaks you write, and a paragraph may not
+# begin with `*`, `[`, `.`, or `}`, which Fluent reserves.
 welcome_title = Welcome to {{title}}
 welcome_body =
     This is **{{title}}**, an [App Fair](https://appfair.org) app: free software, built from source you can read, and distributed through the App Fair Project.
 
-    The App Fair builds every app itself from a tagged commit, compares what it built against the release the maintainer published, and signs it with the project's own keys. Nothing else is added along the way.
+    The App Fair builds every app from a tagged commit, compares that build against the release the maintainer published, and signs it with the project's keys.
 
     Read more at [appfair.org](https://appfair.org), or open [**Settings**](#settings) to change the appearance and the language.
 

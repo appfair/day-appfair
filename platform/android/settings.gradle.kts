@@ -19,7 +19,7 @@ plugins {
     // Where the app's dependencies resolve from, including repositories its pieces declare.
     id("dev.daybrite.day.settings")
 }
-// A constant: Gradle shows it in the IDE and nothing else reads it, so it need not
-// carry the package name into a second file (DESIGN.md §17.5 "Renaming a project").
+// Gradle shows this in the IDE and nothing else reads it, so renaming the project does not
+// touch it.
 rootProject.name = "dayapp"
 include(":app")
