@@ -56,5 +56,8 @@ day launch -p macos-appkit --script dayscript/demo.yaml
 DAY_LOCALE=fr day launch -p macos-appkit --script dayscript/demo.yaml
 ```
 
-`.github/workflows/template.yml` runs exactly that on macOS and Linux for every push and pull
-request.
+`.github/workflows/template.yml` runs that on every push and pull request, then hands the
+generated app to `daybrite/actions/.github/workflows/dayapp.yml` — the workflow every Day app
+uses — which builds all eight primary targets and runs the walkthrough in both languages and both
+appearances. The app is scaffolded there through that workflow's `setup-command` input, which is
+also what tells it the project is generated rather than checked in.

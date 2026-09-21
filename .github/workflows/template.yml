@@ -1,9 +1,12 @@
 # SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
 #
-# The template checking itself: scaffold an app from this checkout, lint it, build it, and run
-# the walkthrough it ships. A template is only useful if `day new app --template` still produces
-# something that builds, and that is a thing to find out here rather than in someone's first
-# five minutes.
+# The template checking itself. A template is only useful if `day new app --template` still
+# produces something that builds, and that is a thing to find out here rather than in someone's
+# first five minutes.
+#
+# Two jobs: the template's own rules on one ubuntu runner, and then the app it generates put
+# through the workflow every Day app uses — all eight primary targets, both languages, both
+# appearances, and the packaging each platform does.
 name: template
 
 on:
@@ -16,18 +19,11 @@ permissions:
   contents: read
 
 jobs:
-  scaffold:
-    name: scaffold and build (${{ matrix.target }})
-    runs-on: ${{ matrix.runner }}
-    timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          # One desktop host per operating system, which is what a template can prove cheaply:
-          # the mobile targets are scaffolded and linted below without an emulator.
-          - { target: macos-appkit, runner: macos-15 }
-          - { target: linux-gtk, runner: ubuntu-latest }
+  # What only a template can get wrong: the licences, the SPDX notices, and the dot-directory
+  # conventions. Seconds on one runner, and it fails before the matrix below spends an hour.
+  checks:
+    name: checks
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
         with:
@@ -37,61 +33,78 @@ jobs:
         uses: daybrite/actions/.github/actions/setup-day-cli@main
         with:
           # The framework the template is written against; `latest` would test this checkout
-          # against a published CLI that may not carry the template conventions it uses.
+          # against a published CLI that may not carry the conventions it uses.
           version: main
-
-      - name: Everything ${{ matrix.target }} needs
-        uses: daybrite/actions/.github/actions/setup-day-deps@main
-        with:
-          target: ${{ matrix.target }}
 
       - name: Scaffold an app from this template
         run: |
           set -euo pipefail
-          # Every target the template carries a host project for, so the scaffold is the whole
-          # template rather than the part this runner happens to build.
-          "$DAY_BIN" new app Fair-Starter --template template --no-input \
-            --toolkit macos-appkit --toolkit linux-gtk --toolkit ios-uikit \
-            --toolkit android-mdc --toolkit harmony-arkui
+          "$DAY_BIN" new app fair-starter --template template --no-input \
+            --appid org.appfair.app.fairstarter --git \
+            --toolkit windows-xaml,macos-appkit,linux-gtk,linux-qt,ios-uikit,android-mdc,harmony-arkui,web-dom
           ls -la fair-starter
 
-      - name: The scaffold is a valid Day project
+      - name: It is a valid Day project
+        working-directory: fair-starter
+        run: |
+          "$DAY_BIN" lint
+
+      - name: It carries its licences, and every source file says so
         working-directory: fair-starter
         run: |
           set -euo pipefail
-          "$DAY_BIN" lint
-          # Both licence files travel with the app, and every source file names them.
           test -s LICENSE.txt
           test -s LICENSE-EXCEPTIONS.txt
+          grep -q 'GNU AFFERO GENERAL PUBLIC LICENSE' LICENSE.txt
+          grep -q 'APP FAIR DISTRIBUTION EXCEPTION' LICENSE-EXCEPTIONS.txt
           missing=0
           while IFS= read -r file; do
-            head -3 "$file" | grep -q 'SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception' \
+            head -3 "$file" \
+              | grep -q 'SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception' \
               || { echo "::error file=$file::no SPDX header"; missing=1; }
-          done < <(find src build.rs dayscript .github -type f \( -name '*.rs' -o -name '*.yaml' -o -name '*.yml' \))
+          done < <(find src build.rs dayscript .github resource/locales store -type f \
+                     \( -name '*.rs' -o -name '*.yaml' -o -name '*.yml' -o -name '*.ftl' -o -name '*.toml' \))
           test "$missing" -eq 0
-          # The app's own CI travelled as _github/ and arrived as .github/.
+
+      - name: The app's own workflow arrived, and this repository's did not
+        working-directory: fair-starter
+        run: |
+          set -euo pipefail
           test -f .github/workflows/ci.yml
+          test ! -e .github/workflows/template.yml
+          test ! -e .github/README.md
+          # Both languages travel with the app, in the catalogue and in the store listing.
+          test -s resource/locales/en/app.ftl
+          test -s resource/locales/fr/app.ftl
+          test -s store/fr/description.txt
 
-      - name: Build ${{ matrix.target }}
-        working-directory: fair-starter
-        run: |
-          "$DAY_BIN" build -p ${{ matrix.target }}
-
-      - name: Run the walkthrough it ships
-        working-directory: fair-starter
-        run: |
-          "$DAY_BIN" launch -p ${{ matrix.target }} --script dayscript/demo.yaml
-
-      - name: Run it again in French
-        working-directory: fair-starter
-        env:
-          DAY_LOCALE: fr
-        run: |
-          "$DAY_BIN" launch -p ${{ matrix.target }} --script dayscript/demo.yaml
-
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: screenshots-${{ matrix.target }}
-          path: fair-starter/build/day/screenshots
-          if-no-files-found: ignore
+  # The generated app, through the workflow every Day app uses. `setup-command` scaffolds the
+  # project before anything else, which is also what tells the workflow the project is generated
+  # rather than checked in: the Rust preflight, the dependency update and the pristine check all
+  # step aside for it.
+  app:
+    name: app
+    needs: checks
+    uses: daybrite/actions/.github/workflows/dayapp.yml@main
+    with:
+      # The eight primary targets.
+      targets: windows-xaml, macos-appkit, linux-gtk, linux-qt, ios-uikit, android-mdc, harmony-arkui, web-dom
+      day-version: main
+      project-path: fair-starter
+      # `--template .` is this checkout: the setup command runs at the repository root.
+      setup-command: >-
+        day new app fair-starter --template . --no-input
+        --appid org.appfair.app.fairstarter --git
+        --toolkit windows-xaml,macos-appkit,linux-gtk,linux-qt,ios-uikit,android-mdc,harmony-arkui,web-dom
+      # The walkthrough the template ships, run in both languages and both appearances: a string
+      # that only breaks in French, or a control that disappears in dark, fails the build.
+      scripts: dayscript/demo.yaml
+      locales: en fr
+      themes: light dark
+      # A template repository publishes nothing: no release assets, no store uploads, no site.
+      release-assets: false
+      publish-release: false
+      upload-ios: "false"
+      upload-macos: "false"
+      upload-play: "false"
+      deploy-web: false
