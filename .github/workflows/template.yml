@@ -1,0 +1,97 @@
+# SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
+#
+# The template checking itself: scaffold an app from this checkout, lint it, build it, and run
+# the walkthrough it ships. A template is only useful if `day new app --template` still produces
+# something that builds, and that is a thing to find out here rather than in someone's first
+# five minutes.
+name: template
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scaffold:
+    name: scaffold and build (${{ matrix.target }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # One desktop host per operating system, which is what a template can prove cheaply:
+          # the mobile targets are scaffolded and linted below without an emulator.
+          - { target: macos-appkit, runner: macos-15 }
+          - { target: linux-gtk, runner: ubuntu-latest }
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: template
+
+      - name: Install the day CLI
+        uses: daybrite/actions/.github/actions/setup-day-cli@main
+        with:
+          # The framework the template is written against; `latest` would test this checkout
+          # against a published CLI that may not carry the template conventions it uses.
+          version: main
+
+      - name: Everything ${{ matrix.target }} needs
+        uses: daybrite/actions/.github/actions/setup-day-deps@main
+        with:
+          target: ${{ matrix.target }}
+
+      - name: Scaffold an app from this template
+        run: |
+          set -euo pipefail
+          # Every target the template carries a host project for, so the scaffold is the whole
+          # template rather than the part this runner happens to build.
+          "$DAY_BIN" new app Fair-Starter --template template --no-input \
+            --toolkit macos-appkit --toolkit linux-gtk --toolkit ios-uikit \
+            --toolkit android-mdc --toolkit harmony-arkui
+          ls -la fair-starter
+
+      - name: The scaffold is a valid Day project
+        working-directory: fair-starter
+        run: |
+          set -euo pipefail
+          "$DAY_BIN" lint
+          # Both licence files travel with the app, and every source file names them.
+          test -s LICENSE.txt
+          test -s LICENSE-EXCEPTIONS.txt
+          missing=0
+          while IFS= read -r file; do
+            head -3 "$file" | grep -q 'SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception' \
+              || { echo "::error file=$file::no SPDX header"; missing=1; }
+          done < <(find src build.rs dayscript .github -type f \( -name '*.rs' -o -name '*.yaml' -o -name '*.yml' \))
+          test "$missing" -eq 0
+          # The app's own CI travelled as _github/ and arrived as .github/.
+          test -f .github/workflows/ci.yml
+
+      - name: Build ${{ matrix.target }}
+        working-directory: fair-starter
+        run: |
+          "$DAY_BIN" build -p ${{ matrix.target }}
+
+      - name: Run the walkthrough it ships
+        working-directory: fair-starter
+        run: |
+          "$DAY_BIN" launch -p ${{ matrix.target }} --script dayscript/demo.yaml
+
+      - name: Run it again in French
+        working-directory: fair-starter
+        env:
+          DAY_LOCALE: fr
+        run: |
+          "$DAY_BIN" launch -p ${{ matrix.target }} --script dayscript/demo.yaml
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: screenshots-${{ matrix.target }}
+          path: fair-starter/build/day/screenshots
+          if-no-files-found: ignore

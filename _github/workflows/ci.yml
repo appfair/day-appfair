@@ -1,0 +1,42 @@
+# SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
+#
+# {{title}}'s CI: build every target the app declares, and run its walkthrough in every language
+# it ships. The work is the shared Day workflow's; this file only says which targets and which
+# locales (https://daybrite.dev/docs/ci).
+#
+# On a push and on a pull request, and never on a timer: an App Fair app is built again when its
+# source changes, and the App Fair's own queue rebuilds it from a tag when it publishes.
+name: ci
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v[0-9]+.[0-9]+.[0-9]+*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write # release assets on a tag build
+
+jobs:
+  app:
+    uses: daybrite/actions/.github/workflows/dayapp.yml@main
+    secrets: inherit
+    with:
+      # Exactly the targets this app was scaffolded with; add one with `day project add-target`
+      # and add it here too.
+      targets: "{{targets_list}}"
+      day-version: main
+      # The walkthrough beside the app, run per locale and per theme: the same steps drive every
+      # toolkit, so a string that only breaks in French breaks the build.
+      scripts: dayscript/demo.yaml
+      locales: en fr
+      themes: light dark
+      # A tagged build attaches its packages to the release. The App Fair's queue compares what
+      # it builds against these, so leave them on.
+      release-assets: true
+      # The App Fair Project signs and submits through its own catalogue
+      # (https://github.com/appfair/appfair-apps), so this workflow uploads to no store.
+      upload-ios: "false"
+      upload-macos: "false"
+      upload-play: "false"
