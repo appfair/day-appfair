@@ -17,6 +17,11 @@ Three sections (Welcome, The App Fair, Settings) in English and French, a walkth
 them on every toolkit, a store listing in both languages, the AGPL and the App Fair distribution
 exception, and a CI workflow that builds every target the app declares.
 
+That workflow also publishes the web build to the app's own Pages, so a push to the default branch
+puts the app at `https://<owner>.github.io/<repo>/`. The repository needs Settings → Pages →
+Source = GitHub Actions once; until it is set, that one job fails. A `website/site.toml` turns the
+same job into the full project site (daybrite/daysite), with the app under `/webapp/`.
+
 The Welcome page's prose is markdown held in the translation, so a translator can stress a
 different word, and it links to appfair.org. The second section is a heading, a paragraph, and
 three links. Replace it with your app.

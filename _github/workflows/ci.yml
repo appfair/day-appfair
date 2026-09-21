@@ -16,6 +16,8 @@ on:
 
 permissions:
   contents: write # release assets on a tag build
+  pages: write    # web-dom → GitHub Pages (deploy-web)
+  id-token: write # deploy-pages OIDC token (deploy-web)
 
 jobs:
   app:
@@ -34,6 +36,12 @@ jobs:
       # A tagged build attaches its packages to the release. The App Fair queue compares its
       # own build against these, so leave them on.
       release-assets: true
+      # The web build serves from this repository's Pages (https://<owner>.github.io/<repo>/),
+      # reusing the dist the web-dom leg already produced. Set Settings → Pages → Source to
+      # GitHub Actions once, or this job has nowhere to publish. A push to the default branch
+      # deploys. Add a website/site.toml and the same job builds the full project site instead,
+      # with the app under /webapp/.
+      deploy-web: true
       # The App Fair Project signs and submits through its catalog
       # (https://github.com/appfair/appfair-apps), so this workflow uploads to no store.
       upload-ios: "false"
