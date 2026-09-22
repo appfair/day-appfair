@@ -17,6 +17,13 @@ Three sections (Welcome, The App Fair, Settings) in English and French, a walkth
 them on every toolkit, a store listing in both languages, the AGPL and the App Fair distribution
 exception, and a CI workflow that builds every target the app declares.
 
+`Day.toml` carries the id anyone who builds the app gets, and `Day-appfair.toml` beside it the
+ids the App Fair publishes it under — `org.appfair.app.<token>`, with Play's and HarmonyOS's
+hyphen-free spelling. `day --flavor appfair` is how the catalog reads them, and the scaffolded
+CI builds that flavor alongside the app's own and runs
+[appfair-lint](https://github.com/appfair/appfair-apps/tree/main/.github/actions/appfair-lint),
+the catalog's rules, on every push.
+
 That workflow also publishes the web build to the app's own Pages, so a push to the default branch
 puts the app at `https://<owner>.github.io/<repo>/`. The repository needs Settings → Pages →
 Source = GitHub Actions once; until it is set, that one job fails. A `website/site.toml` turns the
@@ -33,6 +40,7 @@ three links. Replace it with your app.
 | `Cargo.toml.hbs` | `Cargo.toml`. The `.hbs` keeps cargo from reading the template as a package |
 | `_gitignore` | `.gitignore` |
 | `_github/workflows/ci.yml` | `.github/workflows/ci.yml`. This repository's `.github/` stays here |
+| `Day-appfair.toml` | the same, with `{{repo}}` / `{{ident}}` rendered into the App Fair ids |
 | `_vscode/` | `.vscode/` |
 | `platform/<os>/` | only the host projects the chosen targets need |
 | `store/` | only when a chosen target ships to a store |

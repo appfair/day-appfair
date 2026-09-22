@@ -20,6 +20,17 @@ permissions:
   id-token: write # deploy-pages OIDC token (deploy-web)
 
 jobs:
+  # The App Fair's rules for an app in its catalog: the licence texts, the licence notice in every
+  # source file, and the flavor manifest holding the ids it publishes under. The same action the
+  # submission checks run (github.com/appfair/appfair-apps), so a problem is found here, where it
+  # is one commit to fix, rather than at the catalog.
+  appfair-lint:
+    name: appfair-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: appfair/appfair-apps/.github/actions/appfair-lint@main
+
   app:
     uses: daybrite/actions/.github/workflows/dayapp.yml@main
     secrets: inherit
@@ -34,6 +45,10 @@ jobs:
       # Every locale the app ships (resource/locales/), so `day localize add` reaches CI too.
       locales: all
       themes: light dark
+      # The App Fair identity (Day-appfair.toml) gets a leg of its own per target, so a break that
+      # only appears under those ids shows up here rather than in the publishing queue. Release
+      # assets, Pages and the store uploads stay with the base build.
+      flavors: appfair
       # A tagged build attaches its packages to the release. The App Fair queue compares its
       # own build against these, so leave them on.
       release-assets: true
@@ -43,8 +58,3 @@ jobs:
       # deploys. Add a website/site.toml and the same job builds the full project site instead,
       # with the app under /webapp/.
       deploy-web: true
-      # The App Fair Project signs and submits through its catalog
-      # (https://github.com/appfair/appfair-apps), so this workflow uploads to no store.
-      upload-ios: "false"
-      upload-macos: "false"
-      upload-play: "false"

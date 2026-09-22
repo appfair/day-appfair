@@ -41,7 +41,7 @@ jobs:
         run: |
           set -euo pipefail
           "$DAY_BIN" new app fair-starter --template template --no-input \
-            --appid org.appfair.app.fairstarter --git \
+            --appid io.github.fair-starter --git \
             --toolkit windows-xaml,macos-appkit,linux-gtk,linux-qt,ios-uikit,android-mdc,harmony-arkui,web-dom
           ls -la fair-starter
 
@@ -75,6 +75,23 @@ jobs:
                      \( -name '*.rs' -o -name '*.yaml' -o -name '*.yml' -o -name '*.ftl' -o -name '*.toml' \))
           test "$missing" -eq 0
 
+      # The catalog's own rules, against the app this template just produced: the same action a
+      # scaffolded app runs on every push, so the template cannot ship a project the App Fair
+      # would refuse.
+      - uses: appfair/appfair-apps/.github/actions/appfair-lint@main
+        with:
+          path: fair-starter
+
+      - name: Its App Fair identity is the token's, and its own id is not
+        working-directory: fair-starter
+        run: |
+          set -euo pipefail
+          # Day.toml keeps the id anyone building the app gets; Day-appfair.toml carries the ids
+          # the catalog publishes under, which Play and HarmonyOS take without a hyphen.
+          grep -qF 'id = "io.github.fair-starter"' Day.toml
+          grep -qF 'id = "org.appfair.app.fair-starter"' Day-appfair.toml
+          test "$(grep -c 'id = "org.appfair.app.fair_starter"' Day-appfair.toml)" = 2
+
       - name: The app's own workflow arrived, and this repository's did not
         working-directory: fair-starter
         run: |
@@ -102,7 +119,7 @@ jobs:
       # `--template .` is this checkout: the setup command runs at the repository root.
       setup-command: >-
         day new app fair-starter --template . --no-input
-        --appid org.appfair.app.fairstarter --git
+        --appid io.github.fair-starter --git
         --toolkit windows-xaml,macos-appkit,linux-gtk,linux-qt,ios-uikit,android-mdc,harmony-arkui,web-dom
       # The walkthrough the template ships, run in both languages and both appearances.
       scripts: dayscript/demo.yaml
