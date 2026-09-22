@@ -44,13 +44,8 @@ jobs:
       # Every locale the app ships (resource/locales/), so `day localize add` reaches CI too.
       locales: all
       themes: light dark
-      # On a tag, the App Fair identity (Day-appfair.toml) gets a leg per target: that is the
-      # build the publishing queue rebuilds. An ordinary push builds the base app alone, and
-      # appfair-lint checks the flavor's ids on every one. Release assets, Pages and the store
-      # uploads stay with the base build.
-      flavors: ${{ startsWith(github.ref, 'refs/tags/v') && 'appfair' || '' }}
-      # A tagged build attaches its packages to the release. The App Fair queue compares its
-      # own build against these, so leave them on.
+      # A tagged build attaches its packages to the release. The App Fair queue rebuilds the app
+      # from that tag under the ids in Day-appfair.toml and compares the two, so leave them on.
       release-assets: true
       # The web build serves from this repository's Pages (https://<owner>.github.io/<repo>/),
       # reusing the dist the web-dom leg produced, on a push to the default branch. Set
