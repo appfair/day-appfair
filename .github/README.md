@@ -7,9 +7,9 @@ This repository is a [Day](https://daybrite.dev) project template: an ordinary D
 day new app Some-App --template https://github.com/appfair/day-appfair
 ```
 
-The root `README.md` is the one a scaffolded app gets, which is why it reads as an app's README
-and carries placeholders. This file is the template's, and `day new` never copies it: the loader
-prunes a template's `.github/` along with its `.git`.
+The root `README.md` is the one a scaffolded app gets, so it reads as an app's README and carries
+placeholders. This file is the template's; `day new` prunes a template's `.github/` along with
+its `.git`.
 
 ## What a scaffolded app starts with
 
@@ -17,21 +17,20 @@ Three sections (Welcome, The App Fair, Settings) in English and French, a walkth
 them on every toolkit, a store listing in both languages, the AGPL and the App Fair distribution
 exception, and a CI workflow that builds every target the app declares.
 
-`Day.toml` carries the id anyone who builds the app gets, and `Day-appfair.toml` beside it the
-ids the App Fair publishes it under — `org.appfair.app.<token>`, with Play's and HarmonyOS's
-hyphen-free spelling. `day --flavor appfair` is how the catalog reads them, and the scaffolded
-CI builds that flavor alongside the app's own and runs
-[appfair-lint](https://github.com/appfair/appfair-apps/tree/main/.github/actions/appfair-lint),
-the catalog's rules, on every push.
+`Day.toml` holds the app's own id. `Day-appfair.toml` beside it holds the ids the App Fair
+publishes under, `org.appfair.app.<token>` with Play's and HarmonyOS's hyphen-free spelling, which
+`day --flavor appfair` reads. The scaffolded CI builds that flavor alongside the app's own and
+runs [appfair-lint](https://github.com/appfair/appfair-apps/tree/main/.github/actions/appfair-lint)
+on every push.
 
-That workflow also publishes the web build to the app's own Pages, so a push to the default branch
-puts the app at `https://<owner>.github.io/<repo>/`. The repository needs Settings → Pages →
-Source = GitHub Actions once; until it is set, that one job fails. A `website/site.toml` turns the
-same job into the full project site (daybrite/daysite), with the app under `/webapp/`.
+It also publishes the web build to the app's Pages, so a push to the default branch puts the app
+at `https://<owner>.github.io/<repo>/`. That needs Settings → Pages → Source = GitHub Actions
+once, or the job fails. A `website/site.toml` turns it into the full project site
+(daybrite/daysite), with the app under `/webapp/`.
 
 The Welcome page's prose is markdown held in the translation, so a translator can stress a
-different word, and it links to appfair.org. The second section is a heading, a paragraph, and
-three links. Replace it with your app.
+different word, and it links to appfair.org. The second section is a heading, a paragraph and
+three links; replace it with your app.
 
 ## Template conventions
 
@@ -46,7 +45,7 @@ three links. Replace it with your app.
 | `store/` | only when a chosen target ships to a store |
 
 Every UTF-8 file is rendered, contents and path, so `src/{{snake}}.rs` works. An unknown
-placeholder is an error rather than empty output. Binary files copy verbatim.
+placeholder fails the scaffold rather than rendering empty. Binary files copy verbatim.
 
 The placeholders used here are `{{title}}`, `{{repo}}`, `{{id}}`, `{{targets_toml}}`,
 `{{targets_list}}`, `{{first_target}}`, `{{day_dep}}`, and `{{day_build_dep}}`. The full set is in
@@ -55,9 +54,9 @@ The placeholders used here are `{{title}}`, `{{repo}}`, `{{id}}`, `{{targets_tom
 ## One Fluent rule
 
 `resource/locales/<tag>/app.ftl` holds the strings. A pattern line may not begin with `*`, `[`,
-`.`, or `}`: Fluent reserves those, and a value that opens with one is dropped from the catalog,
-which shows up as a missing `res::str::…` function at compile time. Write `This is **{{title}}**`
-rather than `**{{title}}** is`.
+`.` or `}`: Fluent reserves those, and a value that opens with one is dropped from the catalog,
+which surfaces as a missing `res::str::…` function at compile time. Write `This is
+**{{title}}**` rather than `**{{title}}** is`.
 
 ## Checking a change
 
@@ -69,11 +68,10 @@ DAY_LOCALE=fr day launch -p macos-appkit --script dayscript/demo.yaml
 ```
 
 `.github/workflows/template.yml` runs that on every push and pull request, then hands the
-generated app to `daybrite/actions/.github/workflows/dayapp.yml`, which builds all eight primary
-targets and runs the walkthrough in both languages and both appearances. That workflow's
-`setup-command` input scaffolds the app, and marks the project generated rather than checked in.
+generated app to `daybrite/actions/.github/workflows/dayapp.yml` for all eight targets in both
+languages and both appearances. Its `setup-command` input scaffolds the app and marks the project
+generated rather than checked in.
 
-A push to the default branch also publishes the generated app's web-dom build to this
-repository's Pages, so what the template produces can be opened at
-<https://appfair.github.io/day-appfair/>. It needs one repository setting: Settings → Pages →
-Source = GitHub Actions.
+A push to the default branch publishes the generated app's web-dom build to this repository's
+Pages, <https://appfair.github.io/day-appfair/>, which needs Settings → Pages → Source = GitHub
+Actions once.

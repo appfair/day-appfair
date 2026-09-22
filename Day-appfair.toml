@@ -1,12 +1,8 @@
 # SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
 #
-# The App Fair build of this app (https://daybrite.dev/docs/flavors): `day --flavor appfair …`
-# merges this over Day.toml, and the App Fair's catalog (github.com/appfair/appfair-apps) builds,
-# signs and submits every release that way. Only the identity differs — the sources, the store
-# listing, the icons and the version are the app's own.
-#
-# Day.toml's `id` stays the app's own, so anyone can build and run it without claiming the
-# catalog's namespace. These are the ids the stores receive.
+# The App Fair build of this app (https://daybrite.dev/docs/flavors). `day --flavor appfair …`
+# merges this over Day.toml, and the catalog (github.com/appfair/appfair-apps) builds, signs and
+# submits every release that way. Only the ids differ; Day.toml keeps the app's own.
 
 [app]
 id = "org.appfair.app.{{repo}}"
@@ -15,7 +11,6 @@ id = "org.appfair.app.{{repo}}"
 [app.android]
 id = "org.appfair.app.{{ident}}"
 
-# HarmonyOS refuses a hyphen in `bundleName` as well (AppScope/app.json5 is schema-checked
-# against it), so the harmony build takes the underscore form too.
+# HarmonyOS refuses a hyphen in `bundleName` too, so the underscore form again.
 [app.harmony]
 id = "org.appfair.app.{{ident}}"

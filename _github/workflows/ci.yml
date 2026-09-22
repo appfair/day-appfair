@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
 #
-# {{title}}'s CI: build every target the app declares, and run its walkthrough in every
-# language it ships (https://daybrite.dev/docs/ci). The shared Day workflow does the work.
+# {{title}}'s CI: every target the app declares, and its walkthrough in every language it ships
+# (https://daybrite.dev/docs/ci). The shared Day workflow does the work.
 #
-# It runs on a push and on a pull request. The App Fair queue rebuilds the app from a tag
-# when it publishes, so there is nothing for a timer to catch.
+# Runs on a push and a pull request. The App Fair queue rebuilds the app from its tag when it
+# publishes, so a timer would catch nothing.
 name: ci
 
 on:
@@ -20,10 +20,9 @@ permissions:
   id-token: write # deploy-pages OIDC token (deploy-web)
 
 jobs:
-  # The App Fair's rules for an app in its catalog: the licence texts, the licence notice in every
-  # source file, and the flavor manifest holding the ids it publishes under. The same action the
-  # submission checks run (github.com/appfair/appfair-apps), so a problem is found here, where it
-  # is one commit to fix, rather than at the catalog.
+  # The catalog's rules: the licence texts, the licence notice in every source file, and the
+  # flavor manifest holding the ids this app publishes under. The submission checks run the same
+  # action (github.com/appfair/appfair-apps).
   appfair-lint:
     name: appfair-lint
     runs-on: ubuntu-latest
@@ -39,22 +38,21 @@ jobs:
       # add it here too.
       targets: "{{targets_list}}"
       day-version: main
-      # The walkthrough beside the app, run per locale and per theme, so a string that breaks
-      # only in French breaks the build.
+      # The walkthrough beside the app, per locale and per theme, so a string that breaks only
+      # in French breaks the build.
       scripts: dayscript/demo.yaml
       # Every locale the app ships (resource/locales/), so `day localize add` reaches CI too.
       locales: all
       themes: light dark
-      # The App Fair identity (Day-appfair.toml) gets a leg of its own per target, so a break that
-      # only appears under those ids shows up here rather than in the publishing queue. Release
-      # assets, Pages and the store uploads stay with the base build.
+      # The App Fair identity (Day-appfair.toml) gets a leg per target, so a break under those
+      # ids shows up here rather than in the publishing queue. Release assets, Pages and the
+      # store uploads stay with the base build.
       flavors: appfair
       # A tagged build attaches its packages to the release. The App Fair queue compares its
       # own build against these, so leave them on.
       release-assets: true
       # The web build serves from this repository's Pages (https://<owner>.github.io/<repo>/),
-      # reusing the dist the web-dom leg already produced. Set Settings → Pages → Source to
-      # GitHub Actions once, or this job has nowhere to publish. A push to the default branch
-      # deploys. Add a website/site.toml and the same job builds the full project site instead,
-      # with the app under /webapp/.
+      # reusing the dist the web-dom leg produced, on a push to the default branch. Set
+      # Settings → Pages → Source to GitHub Actions once. A website/site.toml turns this into
+      # the full project site, with the app under /webapp/.
       deploy-web: true

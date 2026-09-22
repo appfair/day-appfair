@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
 #
-# {{title}}'s walkthrough (https://daybrite.dev/docs/dayscript): drives the running app by element
-# id and route on any target, and doubles as its test.
+# {{title}}'s walkthrough (https://daybrite.dev/docs/dayscript): drives the running app by
+# element id and route on any target, and is also its test.
 #
 #     day launch -p {{first_target}} --script dayscript/demo.yaml
 #
@@ -14,7 +14,7 @@ flow:
   - navigate: { route: welcome }
   - assert_visible: { id: welcome-mark }
   - assert_visible: { id: welcome-title }
-  # Markdown from the locale catalog, so this proves resources, Fluent, and the parser at once.
+  # Markdown from the locale catalog: resources, Fluent and the parser in one step.
   - assert_visible: { id: welcome-body }
   - screenshot: welcome
 

@@ -1,11 +1,10 @@
 # SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
 #
-# The template, checked the way a user meets it: scaffold an app from this checkout, then put
-# that app through the workflow every Day app uses. Eight primary targets, both languages,
-# both appearances, and the packaging each platform does.
+# Scaffolds an app from this checkout and puts it through the workflow every Day app uses: eight
+# targets, both languages, both appearances, and each platform's packaging.
 #
-# A push to the default branch also publishes the generated app's web build to this repository's
-# Pages, so https://appfair.github.io/day-appfair/ is what the template currently produces.
+# A push to the default branch publishes the generated app's web build to this repository's Pages,
+# https://appfair.github.io/day-appfair/.
 name: template
 
 on:
@@ -20,8 +19,8 @@ permissions:
   id-token: write # the OIDC token deploy-pages exchanges
 
 jobs:
-  # What only a template can get wrong: the licenses, the SPDX notices, and the dot-directory
-  # conventions. Seconds on one runner, before the matrix below spends an hour.
+  # The licences, the SPDX notices and the dot-directory conventions: seconds on one runner,
+  # before the matrix below spends an hour.
   checks:
     name: checks
     runs-on: ubuntu-latest
@@ -33,32 +32,31 @@ jobs:
       - name: Install the day CLI
         uses: daybrite/actions/.github/actions/setup-day-cli@main
         with:
-          # The framework the template is written against. `latest` would test this checkout
-          # against a published CLI that may not carry the conventions it uses.
+          # The framework this template is written against; `latest` may predate its conventions.
           version: main
 
       - name: Scaffold an app from this template
         run: |
           set -euo pipefail
           "$DAY_BIN" new app fair-starter --template template --no-input \
-            --appid io.github.fair-starter --git \
+            --appid io.github.fair_starter --git \
             --toolkit windows-xaml,macos-appkit,linux-gtk,linux-qt,ios-uikit,android-mdc,harmony-arkui,web-dom
           ls -la fair-starter
 
-      - name: It is a valid Day project
+      - name: Run day lint
         working-directory: fair-starter
         run: |
           "$DAY_BIN" lint
 
-      # dayapp.yml skips its Rust preflight for a generated project, so the sources this template
-      # ships are formatted here. rustfmt needs no dependencies, so it costs a second.
-      - name: Its sources are formatted
+      # dayapp.yml skips its Rust preflight for a generated project, so rustfmt runs here. It
+      # needs no dependencies and costs a second.
+      - name: Check the formatting
         working-directory: fair-starter
         run: |
           rustup component add rustfmt
           cargo fmt --all -- --check
 
-      - name: It carries its licenses, and every source file says so
+      - name: Check the licences and SPDX headers
         working-directory: fair-starter
         run: |
           set -euo pipefail
@@ -75,38 +73,38 @@ jobs:
                      \( -name '*.rs' -o -name '*.yaml' -o -name '*.yml' -o -name '*.ftl' -o -name '*.toml' \))
           test "$missing" -eq 0
 
-      # The catalog's own rules, against the app this template just produced: the same action a
-      # scaffolded app runs on every push, so the template cannot ship a project the App Fair
-      # would refuse.
+      # The catalog's rules, against the app this template produced: the action a scaffolded app
+      # runs on every push.
       - uses: appfair/appfair-apps/.github/actions/appfair-lint@main
         with:
           path: fair-starter
 
-      - name: Its App Fair identity is the token's, and its own id is not
+      - name: Check the app ids
         working-directory: fair-starter
         run: |
           set -euo pipefail
-          # Day.toml keeps the id anyone building the app gets; Day-appfair.toml carries the ids
-          # the catalog publishes under, which Play and HarmonyOS take without a hyphen.
-          grep -qF 'id = "io.github.fair-starter"' Day.toml
+          # Day.toml holds the app's own id; Day-appfair.toml the ids the catalog publishes
+          # under, which Play and HarmonyOS take without a hyphen.
+          grep -qF 'id = "io.github.fair_starter"' Day.toml
           grep -qF 'id = "org.appfair.app.fair-starter"' Day-appfair.toml
           test "$(grep -c 'id = "org.appfair.app.fair_starter"' Day-appfair.toml)" = 2
 
-      - name: The app's own workflow arrived, and this repository's did not
+      - name: Check the scaffolded files
         working-directory: fair-starter
         run: |
           set -euo pipefail
+          # The app's workflow, not this repository's, and both languages in the catalog and the
+          # store listing.
           test -f .github/workflows/ci.yml
           test ! -e .github/workflows/template.yml
           test ! -e .github/README.md
-          # Both languages travel with the app, in the catalog and in the store listing.
           test -s resource/locales/en/app.ftl
           test -s resource/locales/fr/app.ftl
           test -s store/fr/description.txt
 
-  # The generated app, through the workflow every Day app uses. `setup-command` scaffolds the
-  # project and marks it generated, which skips the Rust preflight, the dependency update, and
-  # the pristine check.
+  # The generated app, through the workflow every Day app uses. `setup-command` scaffolds it and
+  # marks the project generated, which skips the preflight, the dependency update and the
+  # pristine check.
   app:
     name: app
     needs: checks
@@ -116,10 +114,10 @@ jobs:
       targets: windows-xaml, macos-appkit, linux-gtk, linux-qt, ios-uikit, android-mdc, harmony-arkui, web-dom
       day-version: main
       project-path: fair-starter
-      # `--template .` is this checkout: the setup command runs at the repository root.
+      # `--template .` is this checkout; the command runs at the repository root.
       setup-command: >-
         day new app fair-starter --template . --no-input
-        --appid io.github.fair-starter --git
+        --appid io.github.fair_starter --git
         --toolkit windows-xaml,macos-appkit,linux-gtk,linux-qt,ios-uikit,android-mdc,harmony-arkui,web-dom
       # The walkthrough the template ships, run in both languages and both appearances.
       scripts: dayscript/demo.yaml
@@ -131,7 +129,7 @@ jobs:
       upload-ios: "false"
       upload-macos: "false"
       upload-play: "false"
-      # The web-dom build, served from https://appfair.github.io/day-appfair/ so the template's
-      # output can be opened rather than described. It reuses the dist the build job already
-      # produced, and deploys on a push to the default branch once every target has passed.
+      # The web-dom build, served from https://appfair.github.io/day-appfair/. It reuses the dist
+      # the build job produced and deploys on a push to the default branch, once every target has
+      # passed.
       deploy-web: true
