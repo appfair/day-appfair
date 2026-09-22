@@ -12,6 +12,9 @@ on:
     branches: ["**"]
     tags: ["v[0-9]+.[0-9]+.[0-9]+*"]
   pull_request:
+  # Marking a staged release Latest (see `release-mode` below) rebuilds the site against it.
+  release:
+    types: [released]
   workflow_dispatch:
 
 permissions:
@@ -47,6 +50,11 @@ jobs:
       # A tagged build attaches its packages to the release. The App Fair queue rebuilds the app
       # from that tag under the ids in Day-appfair.toml and compares the two, so leave them on.
       release-assets: true
+      # A tag publishes a pre-release, so releases/latest and the site's download links keep
+      # describing the version before it until this one is approved. Marking the release Latest,
+      # which the App Fair's queue does once its signed packages are attached, fires the
+      # `release: released` event above and rebuilds the site against the new version.
+      release-mode: pre-release
       # The web build serves from this repository's Pages (https://<owner>.github.io/<repo>/),
       # reusing the dist the web-dom leg produced, on a push to the default branch. Set
       # Settings → Pages → Source to GitHub Actions once. A website/site.toml turns this into
