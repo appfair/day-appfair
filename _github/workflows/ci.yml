@@ -31,7 +31,8 @@ jobs:
       # The walkthrough beside the app, run per locale and per theme, so a string that breaks
       # only in French breaks the build.
       scripts: dayscript/demo.yaml
-      locales: en fr
+      # Every locale the app ships (resource/locales/), so `day localize add` reaches CI too.
+      locales: all
       themes: light dark
       # A tagged build attaches its packages to the release. The App Fair queue compares its
       # own build against these, so leave them on.
