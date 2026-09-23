@@ -16,7 +16,9 @@ flow:
   - assert_visible: { id: welcome-title }
   # Markdown from the locale catalog: resources, Fluent and the parser in one step.
   - assert_visible: { id: welcome-body }
-  - screenshot: welcome
+  # `store: N` marks a capture as the Nth screenshot of the store listing, in every locale and
+  # on every device CI captures on (https://daybrite.dev/docs/dayscript#screenshots).
+  - screenshot: { name: welcome, store: 1 }
 
   # --- The App Fair section -----------------------------------------------------------------
   - navigate: { route: navigate }
@@ -24,7 +26,7 @@ flow:
   - assert_visible: { id: navigate-title }
   - assert_visible: { id: link-list }
   - assert_visible: { id: link-home }
-  - screenshot: appfair
+  - screenshot: { name: appfair, store: 2 }
 
   # --- Adaptive navigation ------------------------------------------------------------------
   # The same host re-presented; the route has to survive each change.
@@ -49,7 +51,7 @@ flow:
   # android-mdc cannot, so it is left out there. The language row is always present.
   - assert_visible: { id: theme-picker, skip_on: [appkit, gtk, qt, xaml, mdc] }
   - assert_visible: { id: language-picker, skip_on: [appkit, gtk, qt, xaml] }
-  - screenshot: settings
+  - screenshot: { name: settings, store: 3 }
   # Appearance applies live where the row exists.
   - select: { id: theme-picker, index: 2, skip_on: [appkit, gtk, qt, xaml, mdc] }
   - wait_idle: {}
