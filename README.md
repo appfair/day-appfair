@@ -75,3 +75,8 @@ Three settings, each done once, all of them on this repository:
 The App Fair Project builds, signs, and submits the apps in its catalog. When this app is ready,
 tag a release and open a pull request against
 [`appfair/appfair-apps`](https://github.com/appfair/appfair-apps) naming the tag and its commit.
+
+The store listings' screenshots come from that release: the workflow attaches the walkthrough's
+captures as `screenshots.zip` with `gallery.json` beside it, and the App Fair takes the ones
+`dayscript/demo.yaml` marks `store: N`, in that order, for every locale and device the
+walkthrough ran on. Mark the screens the listing should show before you tag.
