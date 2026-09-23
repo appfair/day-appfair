@@ -49,6 +49,27 @@ Keep both files beside the app, and keep the notice on files you add. To publish
 terms, replace both files and the notices before your first release. The App Fair publishes what
 the repository declares.
 
+## One-time repository setup
+
+Three settings, each done once, all of them on this repository:
+
+1. **Pages**: Settings → Pages → Source = **GitHub Actions**. The workflow publishes the site and
+   the web build there.
+2. **Let tags deploy it.** Turning Pages on creates a `github-pages` environment that admits the
+   default branch alone, so a release tag cannot deploy and the site would only ever update on a
+   push to `main`. Add a tag rule:
+
+   ```sh
+   gh api -X POST /repos/<owner>/<repo>/environments/github-pages/deployment-branch-policies \
+     -f name='v*' -f type=tag
+   ```
+
+   or Settings → Environments → `github-pages` → Deployment branches and tags → Add rule →
+   `v*`, type **Tag**. Without it, marking a release Latest rebuilds nothing.
+3. **Install the App Fair app**: <https://github.com/apps/app-fair-publisher> → Install → this
+   repository. It asks for `Contents: Read and write`, which is how the catalog attaches the
+   packages it signed to your release beside your own.
+
 ## Publishing through the App Fair
 
 The App Fair Project builds, signs, and submits the apps in its catalog. When this app is ready,
