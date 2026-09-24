@@ -60,10 +60,20 @@ jobs:
         working-directory: fair-starter
         run: |
           set -euo pipefail
-          test -s LICENSE.txt
-          test -s LICENSE-EXCEPTIONS.txt
-          grep -q 'GNU AFFERO GENERAL PUBLIC LICENSE' LICENSE.txt
-          grep -q 'APP FAIR DISTRIBUTION EXCEPTION' LICENSE-EXCEPTIONS.txt
+          # `check <what> <command…>` runs every test and names each one that fails, in the log
+          # and as an annotation, rather than stopping at a silent `grep -q` with exit code 1.
+          failed=0
+          check() {
+            local what="$1"; shift
+            if ! "$@"; then
+              echo "::error title=${what//:/%3A}::${PWD##*/}: $* failed"
+              failed=1
+            fi
+          }
+          check "the licence" test -s LICENSE.txt
+          check "the licence exception" test -s LICENSE-EXCEPTIONS.txt
+          check "the licence is the AGPL" grep -q 'GNU AFFERO GENERAL PUBLIC LICENSE' LICENSE.txt
+          check "the exception is the App Fair's" grep -q 'APP FAIR DISTRIBUTION EXCEPTION' LICENSE-EXCEPTIONS.txt
           missing=0
           while IFS= read -r file; do
             head -3 "$file" \
@@ -71,7 +81,8 @@ jobs:
               || { echo "::error file=$file::no SPDX header"; missing=1; }
           done < <(find src build.rs dayscript .github resource/locales store -type f \
                      \( -name '*.rs' -o -name '*.yaml' -o -name '*.yml' -o -name '*.ftl' -o -name '*.toml' \))
-          test "$missing" -eq 0
+          check "every source file carries the SPDX header" test "$missing" -eq 0
+          exit "$failed"
 
       # The catalog's rules, against the app this template produced: the action a scaffolded app
       # runs on every push.
@@ -83,24 +94,78 @@ jobs:
         working-directory: fair-starter
         run: |
           set -euo pipefail
+          # `check <what> <command…>` runs every test and names each one that fails, in the log
+          # and as an annotation, rather than stopping at a silent `grep -q` with exit code 1.
+          failed=0
+          check() {
+            local what="$1"; shift
+            if ! "$@"; then
+              echo "::error title=${what//:/%3A}::${PWD##*/}: $* failed"
+              failed=1
+            fi
+          }
           # Day.toml holds the app's own id; Day-appfair.toml the ids the catalog publishes
           # under, which Play and HarmonyOS take without a hyphen.
-          grep -qF 'id = "io.github.fair_starter"' Day.toml
-          grep -qF 'id = "org.appfair.app.fair-starter"' Day-appfair.toml
-          test "$(grep -c 'id = "org.appfair.app.fair_starter"' Day-appfair.toml)" = 2
+          check "Day.toml has the app's own id" grep -qF 'id = "io.github.fair_starter"' Day.toml
+          check "Day-appfair.toml has the catalog id" grep -qF 'id = "org.appfair.app.fair-starter"' Day-appfair.toml
+          check "Day-appfair.toml has the underscore id twice (Play, HarmonyOS)" \
+            test "$(grep -c 'id = "org.appfair.app.fair_starter"' Day-appfair.toml)" = 2
+          exit "$failed"
 
       - name: Check the scaffolded files
         working-directory: fair-starter
         run: |
           set -euo pipefail
-          # The app's workflow, not this repository's, and both languages in the catalog and the
-          # store listing.
-          test -f .github/workflows/ci.yml
-          test ! -e .github/workflows/template.yml
-          test ! -e .github/README.md
-          test -s resource/locales/en/app.ftl
-          test -s resource/locales/fr/app.ftl
-          test -s store/fr/description.txt
+          # `check <what> <command…>` runs every test and names each one that fails, in the log
+          # and as an annotation, rather than stopping at a silent `grep -q` with exit code 1.
+          failed=0
+          check() {
+            local what="$1"; shift
+            if ! "$@"; then
+              echo "::error title=${what//:/%3A}::${PWD##*/}: $* failed"
+              failed=1
+            fi
+          }
+          # The app's workflow, not this repository's, and both languages in the catalog.
+          check "the app's own workflow" test -f .github/workflows/ci.yml
+          check "not this repository's workflow" test ! -e .github/workflows/template.yml
+          check "not this repository's README" test ! -e .github/README.md
+          check "the English catalog" test -s resource/locales/en/app.ftl
+          check "the French catalog" test -s resource/locales/fr/app.ftl
+          # …and both in the store listing. Asked of the CLI rather than of a file, so the check
+          # holds however the listing is laid out (one storefront.toml today, a file per field
+          # before): each locale resolves a description of its own, placeholders filled in.
+          "$DAY_BIN" store export --out "$RUNNER_TEMP/storefront.json"
+          check "the store listing has an English and a French description" python3 - "$RUNNER_TEMP/storefront.json" <<'PY'
+          import json, sys
+          meta = json.load(open(sys.argv[1]))["storefront"]["metadata"]
+          text = {tag: meta.get(tag, {}).get("description", "") for tag in ("en", "fr")}
+          problems = [f"{tag}: no description" for tag, d in text.items() if not d.strip()]
+          problems += [f"{tag}: an unfilled placeholder" for tag, d in text.items() if "{{" in d]
+          if text["en"] and text["en"] == text["fr"]:
+              problems.append("fr: the same text as en")
+          for p in problems:
+              print(p)
+          if problems:
+              print(f"the listing's locales: {', '.join(sorted(meta)) or 'none'}")
+          sys.exit(1 if problems else 0)
+          PY
+          exit "$failed"
+
+      # Whatever failed above, the scaffold as it came out, so the log alone says what was there:
+      # the CLI that made it, its file tree, and the manifests the checks read.
+      - name: Show the scaffold (on failure)
+        if: failure()
+        working-directory: fair-starter
+        run: |
+          echo "::group::day version"; "$DAY_BIN" version || true; echo "::endgroup::"
+          echo "::group::the file tree"
+          find . \( -name .git -o -name target -o -name build \) -prune -o -type f -print | sort
+          echo "::endgroup::"
+          for f in Day.toml Day-appfair.toml store/storefront.toml store/storefront.yaml; do
+            [ -f "$f" ] || continue
+            echo "::group::$f"; cat "$f"; echo "::endgroup::"
+          done
 
   # The generated app, through the workflow every Day app uses. `setup-command` scaffolds it and
   # marks the project generated, which skips the preflight, the dependency update and the
