@@ -47,16 +47,20 @@ flow:
   # route is driven only where Settings is a nav row.
   - navigate: { route: settings, skip_on: [appkit, gtk, qt, xaml] }
   - wait_idle: {}
-  # The appearance row is present only where the backend honors a runtime override;
-  # android-mdc cannot, so it is left out there. The language row is always present.
-  - assert_visible: { id: theme-picker, skip_on: [appkit, gtk, qt, xaml, mdc] }
+  # The appearance row is present only where the backend honors a runtime override
+  # (`Cap::Appearance`): iOS, Android and the web have it, HarmonyOS does not. Opted in by
+  # platform, so a backend without the capability needs no edit here. The language row is
+  # always present.
+  - assert_visible: { id: theme-picker, only_on: [ios, android, web] }
+  # Flipping it live is checked where the flip is instant; on Android it recreates the
+  # activity, which the app scaffold's own walkthrough covers with a pause.
   - assert_visible: { id: language-picker, skip_on: [appkit, gtk, qt, xaml] }
   - screenshot: { name: settings }
   # Appearance applies live where the row exists.
-  - select: { id: theme-picker, index: 2, skip_on: [appkit, gtk, qt, xaml, mdc] }
+  - select: { id: theme-picker, index: 2, only_on: [ios, web] }
   - wait_idle: {}
   - screenshot: dark
-  - select: { id: theme-picker, index: 0, skip_on: [appkit, gtk, qt, xaml, mdc] }
+  - select: { id: theme-picker, index: 0, only_on: [ios, web] }
   - wait_idle: {}
 
   # --- Back to Welcome ----------------------------------------------------------------------
