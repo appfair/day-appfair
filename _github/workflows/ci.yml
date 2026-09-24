@@ -52,7 +52,7 @@ jobs:
       # are these captures. The tablet is the default.
       android-devices: |
         device=pixel,          os=36, orientation=portrait,  slug=phone
-        device=medium_tablet,  os=36, orientation=landscape, slug=tablet
+        device=Nexus 7 2013,  os=36, orientation=landscape, density=240, slug=tablet
         device=medium_phone,   os=24, optional=true
       # A tagged build attaches its packages to the release. The App Fair queue rebuilds the app
       # from that tag under the ids in Day-appfair.toml and compares the two, so leave them on.
