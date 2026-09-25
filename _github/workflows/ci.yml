@@ -66,6 +66,6 @@ jobs:
       # reusing the dist the web-dom leg produced, on a push to the default branch. Set
       # Settings → Pages → Source to GitHub Actions once, and add a `v*` tag rule to the
       # github-pages environment, or a tag build cannot deploy (README, "One-time repository
-      # setup"). A website/site.toml turns this into the full project site, with the app under
-      # /webapp/.
+      # setup"). website/site.toml makes this the full project site (landing page, gallery,
+      # downloads), with the app under /webapp/; without that file only the web build deploys.
       deploy-web: true
