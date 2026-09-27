@@ -63,7 +63,7 @@ release-notes = "Première version."
 # kinds of its own ([storefront.ios-uikit.apple-app-store.screenshots] with `iphone = [...]`,
 # `ipad = [...]`). `day lint` checks every name (https://daybrite.dev/docs/store#screenshots).
 [storefront.ios-uikit.screenshots]
-default = ["welcome", "appfair", "settings"]
+default = ["welcome", "page", "settings"]
 
 [storefront.android-mdc.screenshots]
-default = ["welcome", "appfair", "settings"]
+default = ["welcome", "page", "settings"]

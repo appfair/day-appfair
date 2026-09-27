@@ -5,7 +5,7 @@
 app_title = {{title}}
 
 nav_welcome = Bienvenue
-nav_navigate = L'App Fair
+nav_page = Page
 nav_settings = Réglages
 
 welcome_title = Bienvenue dans {{title}}
@@ -16,13 +16,7 @@ welcome_body =
 
     Pour en savoir plus, rendez-vous sur [appfair.org](https://appfair.org), ou ouvrez les [**Réglages**](#settings) pour changer l'apparence et la langue.
 
-navigate_title = Le projet App Fair
-navigate_body =
-    Les applications publiées ici sont sous licence [AGPL](https://www.gnu.org/licenses/agpl-3.0.html), assortie d'une exception qui autorise leur distribution par les boutiques d'applications. Les deux textes accompagnent cette application, dans LICENSE.txt et LICENSE-EXCEPTIONS.txt.
-navigate_links = Où aller ensuite
-link_home = L'App Fair
-link_docs = Documentation
-link_source = Le code source sur GitHub
+page_placeholder = Cette page est intentionnellement laissée vide
 
 section_general = Général
 settings_appearance = Apparence

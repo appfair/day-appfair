@@ -20,23 +20,21 @@ flow:
   # [screenshots] (https://daybrite.dev/docs/store#screenshots).
   - screenshot: { name: welcome }
 
-  # --- The App Fair section -----------------------------------------------------------------
-  - navigate: { route: navigate }
-  - assert_route: { route: navigate }
-  - assert_visible: { id: navigate-title }
-  - assert_visible: { id: link-list }
-  - assert_visible: { id: link-home }
-  - screenshot: { name: appfair }
+  # --- Page -----------------------------------------------------------------
+  - navigate: { route: page }
+  - assert_route: { route: page }
+  - assert_visible: { id: page-placeholder }
+  - screenshot: { name: page }
 
   # --- Adaptive navigation ------------------------------------------------------------------
   # The same host re-presented; the route has to survive each change.
   - size_class: { width: compact }
   - wait_idle: {}
-  - assert_route: { route: navigate }
+  - assert_route: { route: page }
   - screenshot: compact
   - size_class: { width: expanded }
   - wait_idle: {}
-  - assert_route: { route: navigate }
+  - assert_route: { route: page }
   - screenshot: expanded
   # Back to the device's width. A forced class changes the layout, not the pixels.
   - size_class: { width: auto }

@@ -25,7 +25,7 @@ day launch -p {{first_target}} --locale fr                  # in French
 | path | what it is |
 |---|---|
 | `src/lib.rs` | the window, the navigation host, and the menu bar |
-| `src/pages/` | one file per section: Welcome, The App Fair, Settings |
+| `src/pages/` | one file per section: Welcome, Page, Settings |
 | `resource/locales/` | the strings, in English and French. Add a folder to add a language |
 | `resource/vectors/` | the tab art, drawn as vectors on every platform |
 | `dayscript/demo.yaml` | the walkthrough, which is also the test CI runs |
@@ -76,6 +76,12 @@ Three settings, each done once, all of them on this repository:
 The App Fair Project builds, signs, and submits the apps in its catalog. When this app is ready,
 tag a release and open a pull request against
 [`appfair/appfair-apps`](https://github.com/appfair/appfair-apps) naming the tag and its commit.
+
+`Day-appfair.toml` sets one shared App Fair ID for all stores, derived from the repository
+token by removing hyphens without changing case. For example, `App-Name` uses
+`org.appfair.app.AppName`. The commented Android and HarmonyOS sections can be enabled
+if separate store IDs are needed. `Day.toml` keeps the app's own ID for builds without the
+`appfair` flavor.
 
 The store listings' screenshots come from that release: the workflow attaches the walkthrough's
 captures as `screenshots.zip` with `gallery.json` beside it, and the App Fair takes the ones

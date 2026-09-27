@@ -33,7 +33,7 @@ day::routes! {
     /// The app's sections, as typed routes (https://daybrite.dev/docs/navigation).
     pub(crate) enum Section {
         Welcome => "welcome",
-        Navigate => "navigate",
+        Page => "page",
         Settings => "settings",
     }
 }
@@ -76,10 +76,10 @@ fn window_shell(primary: bool) -> impl Piece {
         // One tint per section, so the icons read apart.
         .icon_tint(Color::hex(0xF59E0B))
         .item_icon(
-            Section::Navigate,
-            res::str::nav_navigate(),
-            res::vectors::tab_navigate,
-            navigate_page,
+            Section::Page,
+            res::str::nav_page(),
+            res::vectors::tab_page,
+            page,
         )
         .icon_tint(Color::hex(0x3B82F6))
         // Settings is a nav row only where there is no menu bar.
