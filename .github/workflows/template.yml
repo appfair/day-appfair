@@ -171,7 +171,11 @@ jobs:
     name: app
     needs: checks
     uses: daybrite/actions/.github/workflows/dayapp.yml@v1
+    # A job-level block grants nothing it does not name, and the shared workflow's jobs each ask
+    # for `contents: read` to check the app out, so it has to be granted here explicitly or the
+    # call fails at startup ("requesting 'contents: read', but is only allowed 'contents: none'").
     permissions:
+      contents: read  # the shared workflow's checkouts
       pages: write    # the generated app's web-dom build → this repository's Pages
       id-token: write # the OIDC token deploy-pages exchanges
     with:
