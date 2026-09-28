@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
 # The Day project manifest (https://daybrite.dev/docs/cli). `name`/`version` come from
 # Cargo.toml; any [app] property may be overridden per platform, toolkit, or target.
 schema = 1

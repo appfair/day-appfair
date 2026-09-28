@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
 # {{title}}: UI strings (https://daybrite.dev/docs/localization). Add a locale by dropping a
 # sibling folder and translating it. This starter ships English and French.
 

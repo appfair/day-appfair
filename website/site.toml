@@ -1,5 +1,3 @@
-# SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
-#
 # {{title}}'s website (https://daybrite.dev/docs/website), built by the shared dayapp workflow
 # from the daybrite/daysite template: a localized landing page from store/'s listing, the
 # walkthrough's screenshots, the downloads, and the web build under /webapp/. Its presence is

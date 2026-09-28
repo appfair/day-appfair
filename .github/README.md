@@ -39,6 +39,7 @@ three links; replace it with your app.
 | `Cargo.toml.hbs` | `Cargo.toml`. The `.hbs` keeps cargo from reading the template as a package |
 | `_gitignore` | `.gitignore` |
 | `_github/workflows/ci.yml` | `.github/workflows/ci.yml`. This repository's `.github/` stays here |
+| `_github/dependabot.yml` | `.github/dependabot.yml`: weekly Dependabot updates for the crates and the pinned actions |
 | `Day-appfair.toml` | the same, with `{{repo}}` / `{{ident}}` rendered into the App Fair ids |
 | `_vscode/` | `.vscode/` |
 | `platform/<os>/` | only the host projects the chosen targets need |

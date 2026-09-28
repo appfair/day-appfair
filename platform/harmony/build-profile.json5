@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
 {
   "app": {
     // No `signingConfig` here → hvigor builds an unsigned .hap; `day build -p harmony-arkui` then patches

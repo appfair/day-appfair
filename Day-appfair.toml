@@ -1,5 +1,3 @@
-# SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
-#
 # The App Fair build of this app (https://daybrite.dev/docs/flavors). `day --flavor appfair …`
 # merges this over Day.toml, and the catalog (github.com/appfair/appfair-apps) builds, signs and
 # submits every release that way. Only the id differs; Day.toml keeps the app's own.

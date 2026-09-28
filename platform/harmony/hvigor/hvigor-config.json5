@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
 {
   // hvigor build config. The command-line-tools bundle hvigor + the @ohos/hvigor-ohos-plugin, so
   // `dependencies` is empty (the plugin resolves from the toolchain). modelVersion 5.0.0 = the

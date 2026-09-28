@@ -1,5 +1,3 @@
-# SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
-#
 # Scaffolds an app from this checkout and puts it through the workflow every Day app uses: eight
 # targets, both languages, both appearances, and each platform's packaging.
 #
@@ -31,10 +29,7 @@ jobs:
           path: template
 
       - name: Install the day CLI
-        uses: daybrite/actions/.github/actions/setup-day-cli@main
-        with:
-          # The framework this template is written against; `latest` may predate its conventions.
-          version: main
+        uses: daybrite/actions/.github/actions/setup-day-cli@v1
 
       - name: Scaffold an app from this template
         run: |
@@ -75,13 +70,14 @@ jobs:
           check "the licence exception" test -s LICENSE-EXCEPTIONS.txt
           check "the licence is the AGPL" grep -q 'GNU AFFERO GENERAL PUBLIC LICENSE' LICENSE.txt
           check "the exception is the App Fair's" grep -q 'APP FAIR DISTRIBUTION EXCEPTION' LICENSE-EXCEPTIONS.txt
+          # Source files only: the notice is not required on configuration or build files (the
+          # manifests, workflows, scripts' YAML, locale catalogs), which the licence files cover.
           missing=0
           while IFS= read -r file; do
             head -3 "$file" \
               | grep -q 'SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception' \
               || { echo "::error file=$file::no SPDX header"; missing=1; }
-          done < <(find src build.rs dayscript .github resource/locales store -type f \
-                     \( -name '*.rs' -o -name '*.yaml' -o -name '*.yml' -o -name '*.ftl' -o -name '*.toml' \))
+          done < <(find src build.rs platform -type f \( -name '*.rs' -o -name '*.swift' \) 2>/dev/null)
           check "every source file carries the SPDX header" test "$missing" -eq 0
           exit "$failed"
 
@@ -174,14 +170,13 @@ jobs:
   app:
     name: app
     needs: checks
-    uses: daybrite/actions/.github/workflows/dayapp.yml@main
+    uses: daybrite/actions/.github/workflows/dayapp.yml@v1
     permissions:
       pages: write    # the generated app's web-dom build → this repository's Pages
       id-token: write # the OIDC token deploy-pages exchanges
     with:
       # The eight primary targets.
       targets: windows-xaml, macos-appkit, linux-gtk, linux-qt, ios-uikit, android-mdc, harmony-arkui, web-dom
-      day-version: main
       project-path: fair-starter
       # `--template .` is this checkout; the command runs at the repository root.
       setup-command: >-

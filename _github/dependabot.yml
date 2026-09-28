@@ -1,0 +1,20 @@
+# Dependabot keeps {{title}}'s dependencies current: a weekly pull request for the crates in
+# Cargo.toml (minor and patch bumps grouped into one PR, majors on their own so a breaking change is
+# reviewed alone) and for the actions and reusable workflows ci.yml pins. This file configures
+# version updates; Dependabot alerts and security updates are switched on per repository under
+# Settings → Code security, or for every repository at once in the organization's settings.
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+version: 2
+updates:
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

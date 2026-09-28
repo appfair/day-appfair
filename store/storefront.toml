@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
 # The store listing (https://daybrite.dev/docs/store): the submission info, the localized text
 # and the screenshots each listing shows, in this one file. It belongs to the App Store record
 # and the Play listing the App Fair creates for the app. The same tree may be written as

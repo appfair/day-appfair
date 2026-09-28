@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
 # {{title}} : chaînes de l'interface (https://daybrite.dev/docs/localization). Chaque clé
 # correspond à celle du catalogue anglais. day-build vérifie que les deux s'accordent.
 

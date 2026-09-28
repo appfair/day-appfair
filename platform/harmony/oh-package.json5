@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
 {
   "modelVersion": "5.0.0",
   // A constant, like the Gradle rootProject.name: DevEco shows it and nothing else reads it,

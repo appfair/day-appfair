@@ -1,5 +1,3 @@
-# SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
-#
 # {{title}}'s walkthrough (https://daybrite.dev/docs/dayscript): drives the running app by
 # element id and route on any target, and is also its test.
 #
