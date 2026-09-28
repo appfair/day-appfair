@@ -101,12 +101,17 @@ jobs:
               failed=1
             fi
           }
-          # Day.toml holds the app's own id; Day-appfair.toml the ids the catalog publishes
-          # under, which Play and HarmonyOS take without a hyphen.
+          # Day.toml holds the app's own id. Day-appfair.toml holds the one id the catalog
+          # publishes under on every store: the app token with its hyphens removed
+          # (`{{repo_no_hyphens}}`), which Play and HarmonyOS accept as-is. The per-store
+          # overrides stay commented out, so nothing else in the file may set an id.
           check "Day.toml has the app's own id" grep -qF 'id = "io.github.fair_starter"' Day.toml
-          check "Day-appfair.toml has the catalog id" grep -qF 'id = "org.appfair.app.fair-starter"' Day-appfair.toml
-          check "Day-appfair.toml has the underscore id twice (Play, HarmonyOS)" \
-            test "$(grep -c 'id = "org.appfair.app.fair_starter"' Day-appfair.toml)" = 2
+          check "Day-appfair.toml has the shared catalog id, once" \
+            test "$(grep -c '^id = "org.appfair.app.fairstarter"' Day-appfair.toml)" = 1
+          check "Day-appfair.toml sets no other id" \
+            test "$(grep -c '^id = ' Day-appfair.toml)" = 1
+          check "Day-appfair.toml carries no hyphenated or underscored catalog id" \
+            sh -c '! grep -qE "org\.appfair\.app\.fair[-_]starter" Day-appfair.toml'
           exit "$failed"
 
       - name: Check the scaffolded files

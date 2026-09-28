@@ -17,9 +17,9 @@ Three sections (Welcome, The App Fair, Settings) in English and French, a walkth
 them on every toolkit, a store listing in both languages, the AGPL and the App Fair distribution
 exception, and a CI workflow that builds every target the app declares.
 
-`Day.toml` holds the app's own id. `Day-appfair.toml` beside it holds the ids the App Fair
-publishes under, `org.appfair.app.<token>` with Play's and HarmonyOS's hyphen-free spelling, which
-`day --flavor appfair` reads. The scaffolded CI builds that flavor alongside the app's own and
+`Day.toml` holds the app's own id. `Day-appfair.toml` beside it holds the one id the App Fair
+publishes under on every store, `org.appfair.app.<token>` with the token's hyphens removed (so Play
+and HarmonyOS accept it as-is), which `day --flavor appfair` reads. The scaffolded CI builds that flavor alongside the app's own and
 runs [appfair-lint](https://github.com/appfair/appfair-apps/tree/main/.github/actions/appfair-lint)
 on every push.
 
