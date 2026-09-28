@@ -13,10 +13,11 @@ on:
   pull_request:
   workflow_dispatch:
 
+# The repository's own jobs run this checkout's code with a read-only token. The write grants
+# sit on the job that calls the shared workflow, whose release and Pages jobs alone use them;
+# its build legs, which run this code too, narrow their token to read-only themselves.
 permissions:
   contents: read
-  pages: write    # the generated app's web-dom build → this repository's Pages
-  id-token: write # the OIDC token deploy-pages exchanges
 
 jobs:
   # The licences, the SPDX notices and the dot-directory conventions: seconds on one runner,
@@ -174,6 +175,9 @@ jobs:
     name: app
     needs: checks
     uses: daybrite/actions/.github/workflows/dayapp.yml@main
+    permissions:
+      pages: write    # the generated app's web-dom build → this repository's Pages
+      id-token: write # the OIDC token deploy-pages exchanges
     with:
       # The eight primary targets.
       targets: windows-xaml, macos-appkit, linux-gtk, linux-qt, ios-uikit, android-mdc, harmony-arkui, web-dom
