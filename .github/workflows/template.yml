@@ -134,6 +134,13 @@ jobs:
           check "not this repository's README" test ! -e .github/README.md
           check "the English catalog" test -s resource/locales/en/app.ftl
           check "the French catalog" test -s resource/locales/fr/app.ftl
+          # Apple project documents are derived by Day. Only host sources/config belong here.
+          for platform in macos ios; do
+            check "$platform has no template Xcode project" test ! -e "../template/platform/$platform/DayApp.xcodeproj"
+            check "$platform has no scaffolded Xcode project" test ! -e "platform/$platform/DayApp.xcodeproj"
+            check "$platform keeps its Swift host" test -s "platform/$platform/Runner/main.swift"
+            check "$platform keeps its build configuration" test -s "platform/$platform/DayApp.xcconfig"
+          done
           # …and both in the store listing. Asked of the CLI rather than of a file, so the check
           # holds however the listing is laid out (one storefront.toml today, a file per field
           # before): each locale resolves a description of its own, placeholders filled in.

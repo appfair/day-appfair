@@ -32,6 +32,19 @@ The Welcome page's prose is markdown held in the translation, so a translator ca
 different word, and it links to appfair.org. The second section is a heading, a paragraph and
 three links; replace it with your app.
 
+## Apple projects
+
+Use a Day CLI with automatic Xcode project generation and **Xcode 27 or newer** for
+Apple builds. This template deliberately carries no `.xcodeproj` folders. Day derives
+`build/day/xcode/<macos|ios>/DayApp.xcodeproj/project.xcproj` when preparing, building,
+or opening the app. Swift sources, plists, and `.xcconfig` files remain template inputs.
+The generated project derives both English and French from `resource/locales/`.
+
+Use `day open -t macos-appkit` or `day open -t ios-uikit` to prepare and open Xcode.
+A scaffolded app can opt into a persistent project with
+`day project add-target macos-appkit,ios-uikit --persist-xcode-project` using Day's
+built-in project template; no `--template` argument is needed for this opt-in.
+
 ## Template conventions
 
 | in this repository | in the scaffolded app |
@@ -42,7 +55,7 @@ three links; replace it with your app.
 | `_github/dependabot.yml` | `.github/dependabot.yml`: weekly Dependabot updates for the crates and the pinned actions |
 | `Day-appfair.toml` | the same, with `{{repo}}` / `{{ident}}` rendered into the App Fair ids |
 | `_vscode/` | `.vscode/` |
-| `platform/<os>/` | only the host projects the chosen targets need |
+| `platform/<os>/` | only the host sources and configuration the chosen targets need |
 | `store/` | only when a chosen target ships to a store |
 
 Every UTF-8 file is rendered, contents and path, so `src/{{snake}}.rs` works. An unknown
