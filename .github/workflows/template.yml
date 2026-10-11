@@ -134,6 +134,10 @@ jobs:
           check "not this repository's README" test ! -e .github/README.md
           check "the English catalog" test -s resource/locales/en/app.ftl
           check "the French catalog" test -s resource/locales/fr/app.ftl
+          for platform in android harmony; do
+            check "$platform has no template build scaffold" test ! -e "../template/platform/$platform"
+            check "$platform has no scaffolded build project" test ! -e "platform/$platform"
+          done
           # Apple project documents are derived by Day. Only host sources/config belong here.
           for platform in macos ios; do
             check "$platform has no template Xcode project" test ! -e "../template/platform/$platform/DayApp.xcodeproj"

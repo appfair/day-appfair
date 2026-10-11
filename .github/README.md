@@ -42,8 +42,16 @@ The generated project derives both English and French from `resource/locales/`.
 
 Use `day open -t macos-appkit` or `day open -t ios-uikit` to prepare and open Xcode.
 A scaffolded app can opt into a persistent project with
-`day project add-target macos-appkit,ios-uikit --persist-xcode-project` using Day's
+`day project add-target macos-appkit,ios-uikit --persist-native-project` using Day's
 built-in project template; no `--template` argument is needed for this opt-in.
+
+Android and HarmonyOS also use generated projects: `build/android/` for Gradle and
+`build/day/harmony/project/` for hvigor. The template carries neither build scaffold.
+Use `day open -t android-mdc` or `day open -t harmony-arkui` to prepare and open the
+project. VS Code's **Open in Android Studio** uses the generated Gradle path too.
+For manual customization, run `day project add-target android-mdc,harmony-arkui
+--persist-native-project` on one line. Existing native projects remain supported.
+A Day CLI with Android/HarmonyOS project generation is required.
 
 ## Template conventions
 

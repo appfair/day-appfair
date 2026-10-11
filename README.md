@@ -37,11 +37,19 @@ VS Code's **Open in Xcode** also prepares the project automatically. For custom 
 or build phases beyond Day's generated layout, create a persistent project:
 
 ```sh
-day project add-target macos-appkit,ios-uikit --persist-xcode-project
+day project add-target macos-appkit,ios-uikit --persist-native-project
 ```
 
 The persistent projects live under `platform/` and take precedence over generated output.
 Ordinary build settings can stay in `DayApp.xcconfig` without opting into persistence.
+
+Android and HarmonyOS also use generated projects: `build/android/` for Gradle and
+`build/day/harmony/project/` for hvigor. The template carries neither build scaffold.
+Use `day open -t android-mdc` or `day open -t harmony-arkui` to prepare and open the
+project. VS Code's **Open in Android Studio** uses the generated Gradle path too.
+For manual customization, run `day project add-target android-mdc,harmony-arkui
+--persist-native-project` on one line. Existing native projects remain supported.
+A Day CLI with Android/HarmonyOS project generation is required.
 
 ## What is here
 
@@ -54,7 +62,7 @@ Ordinary build settings can stay in `DayApp.xcconfig` without opting into persis
 | `dayscript/demo.yaml` | the walkthrough, which is also the test CI runs |
 | `store/` | the App Store and Play listing: `storefront.toml`, with the text per language in it |
 | `website/site.toml` | the project website's one setting, its GitHub Pages URL; the shared workflow builds and deploys the site because this file exists |
-| `platform/` | app-owned native host sources and configuration; Apple project files are generated under `build/day/xcode/` |
+| `platform/` | app-owned native sources and configuration; build project files are generated under `build/` |
 | `.github/workflows/ci.yml` | builds every target and runs the walkthrough in every language |
 | `.github/dependabot.yml` | weekly pull requests that keep the crates and the CI actions current |
 
