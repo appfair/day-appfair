@@ -68,14 +68,11 @@ A Day CLI with Android/HarmonyOS project generation is required.
 
 ## License
 
-This app is free software under the GNU Affero General Public License, version 3 only
-([`LICENSE.txt`](LICENSE.txt)), with the App Fair Distribution Exception
-([`LICENSE-EXCEPTIONS.txt`](LICENSE-EXCEPTIONS.txt)), which permits distribution through an app
-storefront notwithstanding terms that would otherwise conflict with the AGPL. Every source file
-says so:
+This app is free software under the [GNU General Public License, version 2 or later](LICENSE.txt).
+App-owned source files carry this notice.
 
 ```
-// SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
+// SPDX-License-Identifier: GPL-2.0-or-later
 ```
 
 Keep both files beside the app, and keep the notice on files you add. To publish under different

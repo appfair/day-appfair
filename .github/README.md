@@ -14,8 +14,8 @@ its `.git`.
 ## What a scaffolded app starts with
 
 Three sections (Welcome, The App Fair, Settings) in English and French, a walkthrough that drives
-them on every toolkit, a store listing in both languages, the AGPL and the App Fair distribution
-exception, and a CI workflow that builds every target the app declares.
+them on every toolkit, a store listing in both languages, the GPL version 2 text and
+`GPL-2.0-or-later` source notices, and a CI workflow that builds every target the app declares.
 
 `Day.toml` holds the app's own id. `Day-appfair.toml` beside it holds the one id the App Fair
 publishes under on every store, `org.appfair.app.<token>` with the token's hyphens removed (so Play

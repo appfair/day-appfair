@@ -67,15 +67,13 @@ jobs:
             fi
           }
           check "the licence" test -s LICENSE.txt
-          check "the licence exception" test -s LICENSE-EXCEPTIONS.txt
-          check "the licence is the AGPL" grep -q 'GNU AFFERO GENERAL PUBLIC LICENSE' LICENSE.txt
-          check "the exception is the App Fair's" grep -q 'APP FAIR DISTRIBUTION EXCEPTION' LICENSE-EXCEPTIONS.txt
+          check "the licence is GPL version 2" grep -q 'Version 2, June 1991' LICENSE.txt
           # Source files only: the notice is not required on configuration or build files (the
-          # manifests, workflows, scripts' YAML, locale catalogs), which the licence files cover.
+          # manifests, workflows, scripts' YAML, locale catalogs), which the licence covers.
           missing=0
           while IFS= read -r file; do
             head -3 "$file" \
-              | grep -q 'SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception' \
+              | grep -Fxq '// SPDX-License-Identifier: GPL-2.0-or-later' \
               || { echo "::error file=$file::no SPDX header"; missing=1; }
           done < <(find src build.rs platform -type f \( -name '*.rs' -o -name '*.swift' \) 2>/dev/null)
           check "every source file carries the SPDX header" test "$missing" -eq 0

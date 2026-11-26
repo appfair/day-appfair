@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-only WITH App-Fair-Distribution-Exception
+// SPDX-License-Identifier: GPL-2.0-or-later
 //! {{title}}, an App Fair app built with [Day](https://daybrite.dev). `root()` runs once and
 //! opens the first window; each section lives under `pages/`.
 
