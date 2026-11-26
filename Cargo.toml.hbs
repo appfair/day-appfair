@@ -27,10 +27,10 @@ name = "dayapp"
 crate-type = ["rlib"]
 
 [dependencies]
-{{day_dep}}
+day = { package = "day-app", version = "0.*" }
 
 [build-dependencies]
-{{day_build_dep}}
+day-build = "0.*"
 
 
 [workspace]

@@ -43,6 +43,8 @@ jobs:
       # The targets this app was scaffolded with. Add one with `day project add-target`, and
       # add it here too.
       targets: "{{targets_list}}"
+      # Release tags preserve the checked-in crates.io lock and use its released Day CLI.
+      day-deps: ${{ startsWith(github.ref, 'refs/tags/') && 'release' || 'auto' }}
       # The walkthrough beside the app, per locale and per theme, so a string that breaks only
       # in French breaks the build.
       scripts: dayscript/demo.yaml
