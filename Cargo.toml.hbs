@@ -3,35 +3,46 @@ name = "{{name}}"
 version.workspace = true
 edition = "2024"
 license = "GPL-2.0-or-later"
-# Generates typed `res::` constants from `resource/` (see build.rs).
-build = "build.rs"
 
 [features]
 # `mock` keeps bare cargo and rust-analyzer compiling; `day build` overrides it with
-# `--no-default-features --features <backend>` (https://daybrite.dev/docs/project-structure).
+# `--no-default-features --features <backend>` (https://daybrite.dev/docs/reference/project-structure).
 default = ["mock"]
 appkit = ["day/appkit"]
 gtk = ["day/gtk"]
 qt = ["day/qt"]
 uikit = ["day/uikit"]
-mdc = ["day/mdc"]
-xaml = ["day/xaml"]
+material = ["day/material"]
+winui = ["day/winui"]
 arkui = ["day/arkui"]
 dom = ["day/dom"]
 mock = ["day/mock"]
 
-# rlib for the desktop bin; the mobile pipeline requests staticlib/cdylib via `cargo rustc`.
+# Cargo defaults to rlib; the mobile pipeline requests staticlib/cdylib via `cargo rustc`.
 [lib]
 # A constant lib name: staged artifacts and the `dayapp::` import never move on a package rename.
 name = "dayapp"
-crate-type = ["rlib"]
 
+# Day and its pieces come from crates.io: a tagged App Fair release builds from the checked-in
+# Cargo.lock. `day patch --local <checkout>` points a development build at a checkout instead.
 [dependencies]
-day = { package = "day-app", version = "0.*" }
+day = { package = "day-app", version = "0.*", features = ["model"] }
+day-piece-settings = "0.*"
+# The App Fair group every App Fair app carries in its settings.
+day-piece-appfair = "0.*"
+# The items are saved as JSON in the preferences (src/model.rs).
+serde = { version = "1", features = ["derive"] }
 
 [build-dependencies]
 day-build = "0.*"
 
+# Lint policy: Clippy's default lints plus a short list that catches defects rather than style.
+# The project's CI treats every warning as an error (`cargo clippy --all-targets -- -D warnings`),
+# so a finding blocks the change that introduced it. Fix findings in the code; for a site where
+# the lint is wrong, use `#[expect(clippy::<lint>, reason = "…")]`. A stricter table, up to
+# Clippy's `pedantic` group, is the project's choice; keep these lines in it.
+[lints.clippy]
+{{app_clippy_lints}}
 
 [workspace]
 

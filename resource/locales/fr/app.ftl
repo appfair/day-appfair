@@ -1,11 +1,8 @@
-# {{title}} : chaînes de l'interface (https://daybrite.dev/docs/localization). Chaque clé
-# correspond à celle du catalogue anglais. day-build vérifie que les deux s'accordent.
-
+# Les textes de l'interface en français. Les libellés des Réglages et d'À propos viennent du
+# catalogue de Day, et ceux du groupe App Fair du crate day-piece-appfair.
 app_title = {{title}}
-
 nav_welcome = Bienvenue
-nav_page = Page
-nav_settings = Réglages
+nav_items = Éléments
 
 welcome_title = Bienvenue dans {{title}}
 welcome_body =
@@ -13,16 +10,34 @@ welcome_body =
 
     L'App Fair compile chaque application depuis un commit étiqueté, compare le résultat à la version publiée par la mainteneuse, puis la signe avec ses clés.
 
-    Pour en savoir plus, rendez-vous sur [appfair.org](https://appfair.org), ou ouvrez les [**Réglages**](#settings) pour changer l'apparence et la langue.
-
-page_placeholder = Cette page est intentionnellement laissée vide
-
-section_general = Général
-settings_appearance = Apparence
-settings_language = Langue
-appearance_system = Système
-appearance_light = Clair
-appearance_dark = Sombre
+    Ouvrez [**Éléments**](#items) pour ajouter et modifier un élément, ou les [**Réglages**](#settings) pour changer l'apparence et la langue.
 
 menu_file = Fichier
+menu_edit = Édition
+cmd_add = Nouvel élément
+cmd_delete = Supprimer
+cmd_find = Rechercher
 cmd_appfair = Visiter l'App Fair
+
+items_empty = Aucun élément pour le moment. Ajoutez votre premier élément.
+item_none = Sélectionnez un élément à modifier.
+item_untitled = Sans titre
+field_name = Nom
+field_name_hint = Nommez cet élément…
+field_done = Terminé
+field_kind = Type
+field_tint = Couleur
+kind_note = Note
+kind_idea = Idée
+kind_todo = À faire
+tint_blue = Bleu
+tint_green = Vert
+tint_orange = Orange
+tint_purple = Violet
+
+search_items = Rechercher des éléments
+search_empty = Aucun élément ne correspond à la recherche.
+show_done = Afficher les éléments terminés
+cmd_mark_done = Marquer comme terminé
+cmd_mark_not_done = Marquer comme non terminé
+undo_move = Déplacement

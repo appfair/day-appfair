@@ -36,7 +36,7 @@ jobs:
           set -euo pipefail
           "$DAY_BIN" new app fair-starter --template template --no-input \
             --appid io.github.fair_starter --git \
-            --toolkit windows-xaml,macos-appkit,linux-gtk,linux-qt,ios-uikit,android-mdc,harmony-arkui,web-dom
+            --toolkit windows-winui,macos-appkit,linux-gtk,linux-qt,ios-uikit,android-material,harmony-arkui,web-dom
           ls -la fair-starter
 
       - name: Run day lint
@@ -78,6 +78,12 @@ jobs:
           done < <(find src build.rs platform -type f \( -name '*.rs' -o -name '*.swift' \) 2>/dev/null)
           check "every source file carries the SPDX header" test "$missing" -eq 0
           exit "$failed"
+
+      # A new app commits its first Cargo.lock from crates.io, and the lint below reads it: the
+      # `appfair-module` rule wants the published day-piece-appfair in the lock.
+      - name: Lock the app from crates.io
+        working-directory: fair-starter
+        run: cargo generate-lockfile
 
       # The catalog's rules, against the app this template produced: the action a scaffolded app
       # runs on every push.
@@ -132,10 +138,15 @@ jobs:
           check "not this repository's README" test ! -e .github/README.md
           check "the English catalog" test -s resource/locales/en/app.ftl
           check "the French catalog" test -s resource/locales/fr/app.ftl
-          for platform in android harmony; do
-            check "$platform has no template build scaffold" test ! -e "../template/platform/$platform"
-            check "$platform has no scaffolded build project" test ! -e "platform/$platform"
-          done
+          # Android and HarmonyOS build projects are derived by Day. The one Android file is the
+          # optional manifest overlay Day merges into the generated manifest.
+          check "harmony has no template build scaffold" test ! -e ../template/platform/harmony
+          check "harmony has no scaffolded build project" test ! -e platform/harmony
+          check "android keeps its manifest overlay" test -s platform/android/AndroidManifest.xml
+          check "android has no template build scaffold" \
+            test "$(find ../template/platform/android -type f | wc -l)" -eq 1
+          check "android has no scaffolded build project" \
+            test "$(find platform/android -type f | wc -l)" -eq 1
           # Apple project documents are derived by Day. Only host sources/config belong here.
           for platform in macos ios; do
             check "$platform has no template Xcode project" test ! -e "../template/platform/$platform/DayApp.xcodeproj"
@@ -194,13 +205,13 @@ jobs:
       id-token: write # the OIDC token deploy-pages exchanges
     with:
       # The eight primary targets.
-      targets: windows-xaml, macos-appkit, linux-gtk, linux-qt, ios-uikit, android-mdc, harmony-arkui, web-dom
+      targets: windows-winui, macos-appkit, linux-gtk, linux-qt, ios-uikit, android-material, harmony-arkui, web-dom
       project-path: fair-starter
       # `--template .` is this checkout; the command runs at the repository root.
       setup-command: >-
         day new app fair-starter --template . --no-input
         --appid io.github.fair_starter --git
-        --toolkit windows-xaml,macos-appkit,linux-gtk,linux-qt,ios-uikit,android-mdc,harmony-arkui,web-dom
+        --toolkit windows-winui,macos-appkit,linux-gtk,linux-qt,ios-uikit,android-material,harmony-arkui,web-dom
       # The walkthrough the template ships, run in both languages and both appearances.
       scripts: dayscript/demo.yaml
       locales: en fr

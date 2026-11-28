@@ -1,9 +1,9 @@
 # {{title}}'s CI: every target the app declares, and its walkthrough in every language it ships
-# (https://daybrite.dev/docs/ci). The shared Day workflow does the work.
+# (https://daybrite.dev/docs/how-to/github-actions). The shared Day workflow does the work.
 #
 # Runs on a push and a pull request. The App Fair queue rebuilds the app from its tag when it
 # publishes, so a timer would catch nothing.
-name: ci
+name: "{{repo}}"
 
 on:
   push:
@@ -22,9 +22,10 @@ permissions:
   contents: read
 
 jobs:
-  # The catalog's rules: the licence texts, the licence notice in every source file, and the
-  # flavor manifest holding the ids this app publishes under. The submission checks run the same
-  # action (github.com/appfair/appfair-apps).
+  # The catalog's rules: the license text, the license notice in every source file, the flavor
+  # manifest holding the ids this app publishes under, and the App Fair group in the app's
+  # settings (day-piece-appfair). The submission checks run the same action
+  # (github.com/appfair/appfair-apps).
   appfair-lint:
     name: appfair-lint
     runs-on: ubuntu-latest
@@ -40,17 +41,23 @@ jobs:
       id-token: write # deploy-pages OIDC token (deploy-web)
     secrets: inherit
     with:
-      # The targets this app was scaffolded with. Add one with `day project add-target`, and
-      # add it here too.
-      targets: "{{targets_list}}"
+      # Every target Day.toml declares (`[app] targets`), so `day project add-target` reaches CI
+      # on its own. To refine what CI builds, add or remove targets in Day.toml, or name the CI
+      # targets here instead:
+      #   targets: macos-appkit, windows-winui, linux-gtk, ios-uikit, android-material, web-dom
+      targets: all
       # Release tags preserve the checked-in crates.io lock and use its released Day CLI.
-      day-deps: ${{ startsWith(github.ref, 'refs/tags/') && 'release' || 'auto' }}
-      # The walkthrough beside the app, per locale and per theme, so a string that breaks only
-      # in French breaks the build.
-      scripts: dayscript/demo.yaml
-      # Every locale the app ships (resource/locales/), so `day localize add` reaches CI too.
+      day-deps: $\{{ startsWith(github.ref, 'refs/tags/') && 'release' || 'auto' }}
+      # Every dayscript under dayscript/ (`scripts: auto`), on every target, in every locale the
+      # app ships (resource/locales/) and both appearances: a string that breaks only in one
+      # language, or a layout that breaks only in dark mode, breaks the build.
+      scripts: auto
       locales: all
       themes: light dark
+      # Before any target builds, one runner checks formatting, runs Clippy with every warning
+      # an error (the `[lints.clippy]` table in Cargo.toml says which lints are on), and runs
+      # the tests.
+      preflight-checks: fmt, clippy, test
       # Android captures on a 9:16 phone rather than the default 20:9 one: Google Play takes a
       # screenshot whose long side is at most twice its short, and the listing's screenshots
       # are these captures. The tablet is the default.
@@ -72,4 +79,5 @@ jobs:
       # github-pages environment, or a tag build cannot deploy (README, "One-time repository
       # setup"). website/site.toml makes this the full project site (landing page, gallery,
       # downloads), with the app under /webapp/; without that file only the web build deploys.
-      deploy-web: true
+      # Scaffolded as `false` when web-dom is not a target.
+      deploy-web: {{deploy_web}}

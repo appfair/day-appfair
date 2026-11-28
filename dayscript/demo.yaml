@@ -1,65 +1,63 @@
-# {{title}}'s walkthrough (https://daybrite.dev/docs/dayscript): drives the running app by
-# element id and route on any target, and is also its test.
-#
-#     day launch -p {{first_target}} --script dayscript/demo.yaml
-#
-# CI runs it on every toolkit and in every bundled locale, so assert on ids and routes rather
-# than on translated text.
+# A portable round trip through the starter: it adds, edits and removes its own item, leaving
+# the rest alone, and takes no platform-specific steps.
+# The typed name is synthetic test input; UI assertions use localization keys.
+# Run with: day launch -t <target> --script dayscript/demo.yaml
 flow:
-  # --- Welcome ------------------------------------------------------------------------------
-  # The nav host mounts on every platform; which chrome it wears depends on the window width.
   - wait_for: { id: nav }
   - navigate: { route: welcome }
-  - assert_visible: { id: welcome-mark }
-  - assert_visible: { id: welcome-title }
-  # Markdown from the locale catalog: resources, Fluent and the parser in one step.
-  - assert_visible: { id: welcome-body }
-  # The store listings and the website pick from these captures by name: store/app.toml
-  # [screenshots] (https://daybrite.dev/docs/store#screenshots).
-  - screenshot: { name: welcome }
+  - assert_visible: { id: welcome_mark }
+  - assert_text: { id: welcome_title, key: welcome_title }
+  - assert_visible: { id: welcome_body }
+  - a11y_audit: {}
+  - screenshot: welcome
 
-  # --- Page -----------------------------------------------------------------
-  - navigate: { route: page }
-  - assert_route: { route: page }
-  - assert_visible: { id: page-placeholder }
-  - screenshot: { name: page }
+  - navigate: { route: items }
+  - assert_route: { route: items }
+  - wait_for: { id: item_list }
+  - screenshot: list
 
-  # --- Adaptive navigation ------------------------------------------------------------------
-  # The same host re-presented; the route has to survive each change.
-  - size_class: { width: compact }
-  - wait_idle: {}
-  - assert_route: { route: page }
-  - screenshot: compact
-  - size_class: { width: expanded }
-  - wait_idle: {}
-  - assert_route: { route: page }
-  - screenshot: expanded
-  # Back to the device's width. A forced class changes the layout, not the pixels.
-  - size_class: { width: auto }
-  - wait_idle: {}
+  - toolbar: { item: tb_add }
+  - wait_for: { id: field_name }
+  - input: { id: field_name, text: "Written by the demo" }
+  - assert_text: { id: field_name, text: "Written by the demo" }
+  - toggle: { id: field_done, value: true }
+  - assert_value: { id: field_done, value: true }
+  - select: { id: field_kind, index: 1 }
+  - select: { id: field_tint, index: 2 }
+  - a11y_audit: {}
+  - screenshot: editor
 
-  # --- Settings -----------------------------------------------------------------------------
-  # A menu-bar platform opens Settings in a separate window through App ▸ Settings…, so the
-  # route is driven only where Settings is a nav row.
-  - navigate: { route: settings, skip_on: [appkit, gtk, qt, xaml] }
-  - wait_idle: {}
-  # The appearance row is present only where the backend honors a runtime override
-  # (`Cap::Appearance`): iOS, Android and the web have it, HarmonyOS does not. Opted in by
-  # platform, so a backend without the capability needs no edit here. The language row is
-  # always present.
-  - assert_visible: { id: theme-picker, only_on: [ios, android, web] }
-  # Flipping it live is checked where the flip is instant; on Android it recreates the
-  # activity, which the app scaffold's own walkthrough covers with a pause.
-  - assert_visible: { id: language-picker, skip_on: [appkit, gtk, qt, xaml] }
-  - screenshot: { name: settings }
-  # Appearance applies live where the row exists.
-  - select: { id: theme-picker, index: 2, only_on: [ios, web] }
-  - wait_idle: {}
-  - screenshot: dark
-  - select: { id: theme-picker, index: 0, only_on: [ios, web] }
-  - wait_idle: {}
+  # Remove only the item this run created, leaving existing items alone. The search narrows the
+  # list to it, undo brings it back, and redo removes it again.
+  - toolbar: { item: tb_delete }
+  - wait_for: { id: item_list }
+  - assert_missing: { id: field_name }
+  - toolbar: { item: "day::search", text: "Written by the demo" }
+  - wait_for: { id: items_empty }
+  - undo: {}
+  - assert_missing: { id: items_empty }
+  - screenshot: search
+  - redo: {}
+  - wait_for: { id: items_empty }
+  - toolbar: { item: "day::search", text: "" }
 
-  # --- Back to Welcome ----------------------------------------------------------------------
-  - navigate: { route: welcome }
-  - assert_route: { route: welcome }
-  - assert_visible: { id: welcome-body }
+  # Settings: the window on desktop, the section on a phone, opened on its General group where
+  # the language row is. A plain screenshot captures the primary window, so the desktop panel is
+  # captured by its key.
+  - navigate: { route: settings/general }
+  - wait_for: { id: language_picker }
+  - screenshot: settings
+  - screenshot: { name: settings-window, window: day.preferences, skip_on: [uikit, material, arkui, dom] }
+
+  # The App Fair group, which every App Fair app carries in its settings. On a phone it is the
+  # card at the top of the settings root, and the walkthrough opens it from there, the way a
+  # user does. On a desktop it is a page of the Settings window. A scripted run lists the apps
+  # bundled with the crate and makes no request, so every run shows the same page.
+  - navigate: { route: settings, only_on: [uikit, material, arkui, dom] }
+  - tap: { id: "prefs_group:appfair", only_on: [uikit, material, arkui, dom] }
+  - navigate: { route: settings/appfair, skip_on: [uikit, material, arkui, dom] }
+  - wait_for: { id: appfair_donate }
+  - assert_visible: { id: appfair_donate }
+  - assert_visible: { id: appfair_all_apps }
+  - screenshot: appfair
+  - screenshot: { name: appfair-window, window: day.preferences, skip_on: [uikit, material, arkui, dom] }

@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-//! What day-build does before this project compiles: today, the typed `res::` constants
-//! generated from `resource/` (https://daybrite.dev/docs/resources).
+//! Generates the typed `res::` constants for `resource/`: <https://daybrite.dev/docs/how-to/resources>
 fn main() {
     day_build::prebuild_project().expect("day-build: prebuild");
 }

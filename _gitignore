@@ -1,14 +1,37 @@
 /target
 /build
 
+# Scaffolded project guidance belongs to the app, even with a global AGENTS.md ignore.
+!/AGENTS.md
+
 # Commit a crates.io-only Cargo.lock for reproducible release tags. Generate and validate
 # it without local patches; a development lock can contain machine-local dependencies.
 # Only the machine-local overrides from `day patch --local` are ignored here.
 /.cargo/config.toml
 
-# Generated Xcode projects live under /build, already ignored above. If the app opts into
-# a persistent .xcodeproj with `day project add-target --persist-xcode-project`, its project
-# document is source; the IDE state and SwiftPM workspace inside it remain local.
+# What the desktop leaves behind in any directory it shows.
+.DS_Store
+Thumbs.db
+
+# Signing material and store credentials never belong in the repository. CI reads them from
+# repository secrets (https://daybrite.dev/docs/how-to/app-store-submissions), and a local release
+# pack reads them from the environment through `Day.toml`'s `[signing]` tables: an Apple
+# certificate, an App Store Connect or notary key, an Android or HarmonyOS keystore, a
+# provisioning profile, and a `.env` holding the variables those tables and the store lanes
+# expect. Keep each outside the checkout; these patterns are the safety net for the one that
+# lands inside it.
+*.p12
+*.p8
+*.keystore
+*.jks
+*.mobileprovision
+*.p7b
+.env
+.env.*
+
+# Xcode local state. The .xcodeproj itself is source; what Xcode writes inside it is not:
+# project.xcworkspace holds the SwiftPM resolution for the pieces package day generates under
+# build/, and cannot be relocated out of the project.
 xcuserdata/
 DerivedData/
 **/*.xcodeproj/project.xcworkspace/
@@ -37,8 +60,12 @@ platform/android/gradle/gradle-daemon-jvm.properties
 platform/android/.idea/
 
 # The website is generated from repo data: the daysite template clone (local preview) and the
-# synthesized data files. Only website/site.toml and website/theme.css are source.
+# synthesized data files. Keep site.toml, theme.css, optional customization modules, Astro
+# source/content, and theme dependency lockfiles tracked.
 website/.daysite/
+website/node_modules/
+website/.astro/
+website/dist/
 website/appindex.json
 website/channels.json
 website/gallery-manifest.json

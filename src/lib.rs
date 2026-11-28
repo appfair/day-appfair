@@ -1,124 +1,133 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-//! {{title}}, an App Fair app built with [Day](https://daybrite.dev). `root()` runs once and
-//! opens the first window; each section lives under `pages/`.
+//! {{title}}, an App Fair app: a welcome page, a list of items with an editor, and settings.
 
 use day::prelude::*;
+use day_piece_settings::prelude::*;
 
+mod model;
 mod pages;
-use crate::pages::*;
 
-// Entry point for the mobile hosts; a desktop build enters through src/main.rs.
-day::day_start!(options: window(), root);
+use model::{SHOW_DONE, Scene};
 
-/// Options for every window. The catalog and title go to `launch`, which installs them
-/// (https://daybrite.dev/docs/localization).
-pub fn window() -> day::WindowOptions {
-    day::WindowOptions {
-        locales: Some((res::locales::DEFAULT, res::locales::CATALOG)),
-        title_fn: Some(|| res::str::app_title().format()),
-        // Desktop only; phones fill the screen.
-        size: day::prelude::Size::new(960.0, 640.0),
-        ..Default::default()
-    }
-}
-
-// Typed names for everything under `resource/` (https://daybrite.dev/docs/resources).
+// Typed constants for everything under resource/: https://daybrite.dev/docs/how-to/resources
 day::resources!();
-
-/// The `day::prefs` keys the Settings page writes and startup reads.
-pub(crate) const THEME_KEY: &str = "app.theme";
-pub(crate) const LOCALE_KEY: &str = "app.locale";
+// The mobile and web entry point; desktop enters through src/main.rs.
+day::day_start!(options: res::window_options(), root);
 
 day::routes! {
-    /// The app's sections, as typed routes (https://daybrite.dev/docs/navigation).
+    /// The app's sections, which are also the routes links and dayscript navigate to.
     pub(crate) enum Section {
         Welcome => "welcome",
-        Page => "page",
+        Items => "items",
         Settings => "settings",
     }
 }
 
-/// True where there is a menu bar, so Settings lives in the App menu instead of the nav.
-pub(crate) fn has_menu_bar() -> bool {
-    capability(Cap::AppMenu) != Support::Unsupported
-}
-
-/// One-time app setup, then the first window's content.
+/// The window's content: shared state, then adaptive navigation over the pages.
+/// <https://daybrite.dev/docs/how-to/navigation>
 pub fn root() -> impl Piece {
-    // Day installs a logger at launch, so `info!` works as is.
-    info!("{{title}} starting");
-    // Reapply the saved appearance and language before anything is built.
-    pages::apply_startup();
+    // Settings and About open from the app menu on desktop and as a section on a phone. The
+    // app's own settings are a group of rows over `Pref`s.
+    let prefs = Preferences::new()
+        .about(About::from_manifest().website("https://appfair.org"))
+        .group(general_group(res::locales::ALL))
+        .group(
+            Group::new("items", res::str::nav_items())
+                .icon(res::vectors::tab_items)
+                .row(rows::toggle(&SHOW_DONE, res::str::show_done())),
+        )
+        // The App Fair group: about the project, the donation link, and the other App Fair apps.
+        .provider(&day_piece_appfair::APP_FAIR)
+        .install();
 
-    // A Settings window and App ▸ Settings… on desktop; a fullscreen cover elsewhere.
-    day::register_preferences(settings_body);
-    // File ▸ New Window builds the same shell again.
-    day::register_new_window(|| window_shell(false));
-    app_menu(menus());
-
-    window_shell(true)
+    Scene::scoped(move |scene| {
+        app_menu(menus(scene));
+        undo_history(scene);
+        nav(scene.section)
+            .title(res::str::app_title())
+            // The list and the editor sit side by side on desktop and stack on a phone.
+            .content_list(
+                ContentList::new(pages::item_list)
+                    .only_for(|s: &Section| *s == Section::Items)
+                    .detail_for(scene.selected)
+                    .detail_title(move || scene.selected_title()),
+            )
+            .items((
+                item(Section::Welcome, res::str::nav_welcome())
+                    .icon(res::vectors::tab_welcome)
+                    .page(pages::welcome),
+                item(Section::Items, res::str::nav_items())
+                    .icon(res::vectors::tab_items)
+                    .badge(move || scene.open_count())
+                    .page(pages::editor),
+                // `None` where the desktop app menu holds Settings instead.
+                prefs
+                    .nav_item(Section::Settings)
+                    .map(|i| i.icon(res::vectors::tab_settings)),
+            ))
+            .restore("app.section")
+            .id(day::id!(nav))
+    })
 }
 
-/// One window's UI, for the first window and every File ▸ New Window.
-///
-/// Tabs on a phone, a rail on a tablet, a sidebar on a desktop
-/// (https://daybrite.dev/docs/navigation).
-fn window_shell(primary: bool) -> impl Piece {
-    let section = Signal::new(Section::Welcome);
-    let nav = nav(section)
-        .title(res::str::app_title())
-        .item_icon(
-            Section::Welcome,
-            res::str::nav_welcome(),
-            res::vectors::tab_welcome,
-            welcome_page,
-        )
-        // One tint per section, so the icons read apart.
-        .icon_tint(Color::hex(0xF59E0B))
-        .item_icon(
-            Section::Page,
-            res::str::nav_page(),
-            res::vectors::tab_page,
-            page,
-        )
-        .icon_tint(Color::hex(0x3B82F6))
-        // Settings is a nav row only where there is no menu bar.
-        .items(
-            move || {
-                if has_menu_bar() {
-                    Vec::new()
-                } else {
-                    vec![Section::Settings]
-                }
-            },
-            |s: &Section| {
-                item(*s, res::str::nav_settings())
-                    .icon(res::vectors::tab_settings)
-                    .icon_tint(Color::hex(0x10B981))
-            },
-        )
-        .destination(|_: &Section| settings_page())
-        .id("nav");
-    // Only the first window joins the route namespace: two routed navs make a deep link
-    // ambiguous.
-    if primary {
-        nav.restore("app.section")
-    } else {
-        nav.local()
-    }
+/// The menu bar; menu roles supply the native editing commands.
+/// <https://daybrite.dev/docs/how-to/guide-desktop>
+fn menus(scene: Scene) -> Vec<MenuEntry> {
+    vec![
+        sub_menu(
+            res::str::menu_file(),
+            vec![
+                menu_item(res::str::cmd_add())
+                    .shortcut(Shortcut::primary("n"))
+                    .action(move || scene.new_item()),
+                menu_separator(),
+                menu_item(res::str::cmd_appfair())
+                    .action(|| open_link(day_piece_appfair::WEBSITE_URL)),
+                menu_separator(),
+                menu_role(MenuRole::CloseWindow),
+            ],
+        ),
+        sub_menu(
+            res::str::menu_edit(),
+            vec![
+                menu_role(MenuRole::Undo),
+                menu_role(MenuRole::Redo),
+                menu_separator(),
+                menu_item(res::str::cmd_delete())
+                    .shortcut(Shortcut::primary("Delete"))
+                    .action(move || scene.delete_selected()),
+                menu_separator(),
+                menu_item(res::str::cmd_find())
+                    .shortcut(Shortcut::primary("f"))
+                    .action(day::focus_search),
+                menu_separator(),
+                menu_role(MenuRole::Cut),
+                menu_role(MenuRole::Copy),
+                menu_role(MenuRole::Paste),
+                menu_role(MenuRole::SelectAll),
+            ],
+        ),
+    ]
 }
 
-/// The desktop menu bar; the mobile toolkits ignore it (https://daybrite.dev/docs/guide-desktop).
-fn menus() -> Vec<MenuEntry> {
-    vec![sub_menu(
-        res::str::menu_file().format(),
-        vec![
-            // The platform's New Window item and ⌘N.
-            menu_role(MenuRole::NewWindow),
-            menu_separator(),
-            menu_item(res::str::cmd_appfair().format()).action(|| open_link("https://appfair.org")),
-            menu_separator(),
-            menu_role(MenuRole::CloseWindow),
-        ],
-    )]
+/// Undo and Redo for every change to the items, through the Edit menu and the platform's own
+/// gestures. Each change is named in the menu by its field or command.
+/// <https://daybrite.dev/docs/explanation/reactivity>
+fn undo_history(scene: Scene) {
+    let history = day::model::UndoStack::new(100);
+    history.watch(scene.items);
+    history.set_label_resolver(|label| {
+        match label {
+            "push" => res::str::cmd_add(),
+            "remove" => res::str::cmd_delete(),
+            "move" => res::str::undo_move(),
+            "name" => res::str::field_name(),
+            "done" => res::str::field_done(),
+            "kind" => res::str::field_kind(),
+            "tint" => res::str::field_tint(),
+            other => return other.to_owned(),
+        }
+        .format()
+    });
+    day::install_undo(&history);
 }

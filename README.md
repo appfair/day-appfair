@@ -9,62 +9,72 @@ This app was scaffolded from the App Fair's template:
 day new app {{repo}} --template https://github.com/appfair/day-appfair
 ```
 
-## Running it
+## Run it
 
-```bash
-day launch -p {{first_target}}                              # build and run
-day launch -p {{first_target}} --script dayscript/demo.yaml # run the walkthrough
-day launch -p {{first_target}} --locale fr                  # in French
-```
-
-`day devices list` shows the simulators and emulators available for the mobile targets, and
-`day doctor` says what a target still needs installed.
-
-## Apple projects
-
-macOS and iOS builds require **Xcode 27 or newer** and a Day CLI with automatic Xcode
-project generation. No `.xcodeproj` folder is checked in by default. `day build`,
-`day launch`, `day prepare`, and `day open` derive JSON5 projects under
-`build/day/xcode/<macos|ios>/DayApp.xcodeproj/`. Keep Swift sources, plists, and editable
-`DayApp.xcconfig` files under `platform/`.
+Day compiles one toolkit backend per binary, so name a target when you build or launch;
+`Day.toml` lists the app's targets.
 
 ```sh
-day open -t macos-appkit
-day open -t ios-uikit
+day doctor                     # check the toolchains for your targets
+day launch -t {{first_target}}  # build + run
+day launch -t {{first_target}} --script dayscript/demo.yaml   # walk through the app
+day launch -t {{first_target}} --locale fr                    # in French
 ```
 
-VS Code's **Open in Xcode** also prepares the project automatically. For custom targets
-or build phases beyond Day's generated layout, create a persistent project:
+A bare `cargo build` or `cargo test` uses the crate's default `mock` backend, which is also what
+rust-analyzer checks.
 
-```sh
-day project add-target macos-appkit,ios-uikit --persist-native-project
+## What it does
+
+Welcome and Items share adaptive navigation: the item list and editor sit side by side on a wide
+window and stack on a phone. Give an item a name, a type and a color, and mark it done; every
+change is saved as you make it, and Undo and Redo step back through them. Search narrows the
+list, a swipe or the context menu marks an item done, dragging reorders it, and the Items tab
+counts what is left to do. Settings holds the appearance, the language, the app's own setting for
+completed items, and the App Fair group; About shows the app's name and version. On desktop both
+open from the app menu; on a phone, Settings is a section. The app reopens on the section you
+last visited.
+
+## The App Fair group
+
+Every App Fair app carries the App Fair group in its settings. The group says what the App Fair
+Project is, links to the donation page, and lists the other App Fair apps on the store for the
+platform the app runs on. It comes from the
+[`day-piece-appfair`](https://github.com/appfair/day-piece-appfair) crate: `Cargo.toml` depends
+on it, and `src/lib.rs` names its provider where the app declares its settings.
+
+```rust
+.provider(&day_piece_appfair::APP_FAIR)
 ```
 
-The persistent projects live under `platform/` and take precedence over generated output.
-Ordinary build settings can stay in `DayApp.xcconfig` without opting into persistence.
+Keep both lines. The `appfair-module` rule of
+[appfair-lint](https://github.com/appfair/appfair-apps/tree/main/.github/actions/appfair-lint)
+checks for them on every push and when the app is submitted. The rule also reads the committed
+`Cargo.lock`, which has to take the crate from crates.io, so commit a lock before the first push
+([Release dependency policy](#release-dependency-policy)). The id `appfair` belongs to this
+group: give the app's own settings groups other ids.
 
-Android and HarmonyOS also use generated projects: `build/android/` for Gradle and
-`build/day/harmony/project/` for hvigor. The template carries neither build scaffold.
-Use `day open -t android-mdc` or `day open -t harmony-arkui` to prepare and open the
-project. VS Code's **Open in Android Studio** uses the generated Gradle path too.
-For manual customization, run `day project add-target android-mdc,harmony-arkui
---persist-native-project` on one line. Existing native projects remain supported.
-A Day CLI with Android/HarmonyOS project generation is required.
+The walkthrough opens the group the way a user does, from the card on the settings root on a
+phone and from the Settings window on a desktop, and captures it.
 
-## What is here
+## The code
 
-| path | what it is |
-|---|---|
-| `src/lib.rs` | the window, the navigation host, and the menu bar |
-| `src/pages/` | one file per section: Welcome, Page, Settings |
-| `resource/locales/` | the strings, in English and French. Add a folder to add a language |
-| `resource/vectors/` | the tab art, drawn as vectors on every platform |
-| `dayscript/demo.yaml` | the walkthrough, which is also the test CI runs |
-| `store/` | the App Store and Play listing: `storefront.toml`, with the text per language in it |
-| `website/site.toml` | the project website's one setting, its GitHub Pages URL; the shared workflow builds and deploys the site because this file exists |
-| `platform/` | app-owned native sources and configuration; build project files are generated under `build/` |
-| `.github/workflows/ci.yml` | builds every target and runs the walkthrough in every language |
-| `.github/dependabot.yml` | weekly pull requests that keep the crates and the CI actions current |
+- `src/lib.rs` sets up the window, the routes, the navigation, the menus, and the settings.
+- `src/model.rs` holds the items and the selection they share, with the unit tests.
+- `src/pages.rs` builds the Welcome page, the item list, and the editor.
+- `resource/locales/` holds every string the app shows, in English and French.
+- `dayscript/demo.yaml` walks through the app on every target and takes the screenshots.
+- `Day.toml` holds the app's identity, targets, and window size, and `Day-appfair.toml` holds
+  the id the App Fair publishes under.
+- `platform/` holds the app-owned native files. Day generates the native projects under
+  `build/`, and `day open -t <target>` opens one in its IDE
+  ([native projects](https://daybrite.dev/docs/how-to/native-projects)).
+- `store/` and `website/` hold the store listing and the website settings.
+- `.github/workflows/ci.yml` runs appfair-lint, then builds and tests every target through the
+  shared [Day workflow](https://daybrite.dev/docs/how-to/github-actions).
+  `.github/dependabot.yml` opens weekly pull requests for the crates and the CI actions.
+
+`day lint` checks routes, element ids, and locale coverage. Apple builds need Xcode 27 or newer.
 
 ## License
 
@@ -75,9 +85,9 @@ App-owned source files carry this notice.
 // SPDX-License-Identifier: GPL-2.0-or-later
 ```
 
-Keep both files beside the app, and keep the notice on files you add. To publish under different
-terms, replace both files and the notices before your first release. The App Fair publishes what
-the repository declares.
+Keep `LICENSE.txt` beside the app, and keep the notice on files you add. To publish under
+different terms, replace the file and the notices before your first release. The App Fair
+publishes what the repository declares.
 
 ## One-time repository setup
 
